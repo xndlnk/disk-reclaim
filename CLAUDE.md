@@ -25,7 +25,7 @@ An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and le
 - **App.js** — the interactive UI and all keyboard handling (`useInput`). Holds the core state: `current` folder, `cursor`, `marked` (Map path→node), `mode` (`browse` | `confirm` | `deleting`), and `history` (folder→cursor position). Renders children sorted largest-first through a scrolling viewport (`windowFor`).
 - **reclaim.js** — deletion + tree math. `topLevelMarked()` dedups overlapping marks (a file inside a marked folder is dropped). `deleteNodes()` does `fs.rm(..., {recursive, force})` and never throws — returns `{deleted, failed}`. `removeFromTree()` splices a node and subtracts its size from every ancestor in O(depth) so freed space shows immediately without rescanning.
 - **rules.js** — the auto-mark rule engine. `RULES` is an extensible registry (`{ id, label, match(node) }`) of regenerable directories (node_modules, dist, build, .next, target, __pycache__, .gradle). `findMatches(root)` walks the whole tree and returns matched nodes, stopping descent at each match so nested duplicates don't accumulate. `App.js` binds this to `r`, merging matches into the `marked` cart.
-- **format.js** — `humanSize(bytes)` and `bar(fraction, width)` display helpers.
+- **format.js** — display helpers: `humanSize(bytes)`, `bar(fraction, width)`, and `relativePath(rootPath, nodePath)` (a node's path relative to the scanned root, used to label cart items).
 
 ### Key bindings (defined in App.js `useInput`)
 `↑/↓` or `k/j` move · `→/Enter/l` enter folder · `←/Backspace/h` up · `g/G` top/bottom · `Space/m` mark · `r` apply rules (auto-mark reclaimable folders) · `d` delete marked (confirm with `y`) · `c` clear marks · `q`/`Ctrl+C` quit.

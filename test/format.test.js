@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { humanSize, bar } from '../src/format.js';
+import { humanSize, bar, relativePath } from '../src/format.js';
 
 test('humanSize: zero and sub-1 bytes render as "0 B"', () => {
   assert.equal(humanSize(0), '0 B');
@@ -41,4 +41,16 @@ test('bar: half fills half the width', () => {
 test('bar: clamps out-of-range fractions', () => {
   assert.equal(bar(-1, 4), '[    ]');
   assert.equal(bar(2, 4), '[####]');
+});
+
+test('relativePath: nested node is shown relative to the scan root', () => {
+  assert.equal(relativePath('/scan', '/scan/app/node_modules'), 'app/node_modules');
+});
+
+test('relativePath: a direct child is just its name', () => {
+  assert.equal(relativePath('/scan', '/scan/dist'), 'dist');
+});
+
+test('relativePath: the root itself renders as "."', () => {
+  assert.equal(relativePath('/scan', '/scan'), '.');
 });

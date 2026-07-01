@@ -38,9 +38,11 @@ disk-reclaim ~/Downloads
 ## Reclaiming space
 
 Mark any file or folder with `Space`; it drops into the **reclaim cart** on the
-right, which shows a running total of how much space you'd free. Marks persist as
-you navigate, so you can gather targets from all over the tree. Overlapping marks
-(a file inside an already-marked folder) are counted once.
+right, which shows a running total of how much space you'd free. Each cart item is
+labelled with its path relative to the scanned root, so same-named folders in
+different places (e.g. two nested `node_modules`) stay distinguishable. Marks
+persist as you navigate, so you can gather targets from all over the tree.
+Overlapping marks (a file inside an already-marked folder) are counted once.
 
 Press `d` to delete everything in the cart. A confirmation prompt appears in the
 footer — only `y` proceeds; anything else cancels. Deletion never throws on a

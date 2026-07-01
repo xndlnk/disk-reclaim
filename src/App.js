@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import htm from 'htm';
-import { humanSize, bar } from './format.js';
+import { humanSize, bar, relativePath } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
 import { findMatches } from './rules.js';
 
@@ -163,8 +163,8 @@ export default function App({ root }) {
               ? html`<${Text} color="gray">Nothing marked.\nPress <${Text} color="white">space</${Text}> on an item\nto add it here.</${Text}>`
               : markedList.slice(0, viewHeight).map(
                   (n) => html`
-                    <${Text} key=${n.path} wrap="truncate">
-                      <${Text} color="gray">${humanSize(n.size).padStart(9)}</${Text}> ${n.isDir ? '/' : ''}${n.name}
+                    <${Text} key=${n.path} wrap="truncate-middle">
+                      <${Text} color="gray">${humanSize(n.size).padStart(9)}</${Text}> ${relativePath(root.path, n.path)}${n.isDir ? '/' : ''}
                     </${Text}>`
                 )}
             ${markedList.length > viewHeight

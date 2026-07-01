@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 const UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
 
 /** Human-readable byte size, e.g. 1536 -> "1.5 KB". */
@@ -13,4 +15,10 @@ export function humanSize(bytes) {
 export function bar(fraction, width = 12) {
   const filled = Math.round(Math.max(0, Math.min(1, fraction)) * width);
   return `[${'#'.repeat(filled)}${' '.repeat(width - filled)}]`;
+}
+
+/** A node's path relative to the scanned root, for display. Root itself -> ".". */
+export function relativePath(rootPath, nodePath) {
+  const rel = path.relative(rootPath, nodePath);
+  return rel === '' ? '.' : rel;
 }
