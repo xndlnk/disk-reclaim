@@ -23,13 +23,28 @@ space-usage ~/Downloads
 
 ## Keys
 
-| Key                | Action                    |
-| ------------------ | ------------------------- |
-| `↑` / `↓` (`k`/`j`)| Move the cursor           |
-| `→` / `Enter` (`l`)| Open the selected folder  |
-| `←` / `Backspace` (`h`) | Go up to the parent  |
-| `g` / `G`          | Jump to top / bottom      |
-| `q`                | Quit                      |
+| Key                | Action                             |
+| ------------------ | ---------------------------------- |
+| `↑` / `↓` (`k`/`j`)| Move the cursor                    |
+| `→` / `Enter` (`l`)| Open the selected folder           |
+| `←` / `Backspace` (`h`) | Go up to the parent           |
+| `g` / `G`          | Jump to top / bottom               |
+| `Space` (`m`)      | Mark/unmark the item for reclaiming |
+| `d`                | Delete the reclaim cart (asks to confirm) |
+| `c`                | Clear all marks                    |
+| `q`                | Quit                               |
+
+## Reclaiming space
+
+Mark any file or folder with `Space`; it drops into the **reclaim cart** on the
+right, which shows a running total of how much space you'd free. Marks persist as
+you navigate, so you can gather targets from all over the tree. Overlapping marks
+(a file inside an already-marked folder) are counted once.
+
+Press `d` to delete everything in the cart. A confirmation prompt appears in the
+footer — only `y` proceeds; anything else cancels. Deletion never throws on a
+single failure: whatever couldn't be removed stays marked and is reported, and the
+tree's sizes update in place so you see the space you reclaimed immediately.
 
 ## How it works
 
