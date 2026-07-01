@@ -9,9 +9,12 @@ npm install                 # install deps (react, ink, htm)
 node src/index.js [path]    # run the TUI on [path] (defaults to cwd)
 npm start                   # same as: node src/index.js
 npm link && disk-reclaim ~  # install globally, then run as `disk-reclaim [path]`
+
+npm test                    # run the test suite (node --test, built-in runner)
+node --test --test-name-pattern=humanSize   # run a single test by name
 ```
 
-There is no build step, test suite, or linter. Source is plain ES modules (`"type": "module"`) run directly by Node. Verify changes by running the TUI against a real directory.
+There is no build step or linter. Tests use Node's built-in runner (`node:test` + `node:assert`, no devDependencies) and live in `test/*.test.js`, covering the logic/filesystem modules (`format.js`, `reclaim.js`, `scan.js`); the `App.js` Ink UI is not yet tested. Source is plain ES modules (`"type": "module"`) run directly by Node.
 
 ## Architecture
 
@@ -21,10 +24,11 @@ An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and le
 - **scan.js** — `scan(dir, onProgress)` recursively walks the tree. Key invariants: uses `fs.lstat` (never follows symlinks — they get their own tiny size, avoiding double-counting and loops); directory sizes are summed bottom-up; permission errors are stored on the node's `error` field instead of thrown. Nodes are `{ name, path, isDir, size, children, parent, error }`.
 - **App.js** — the interactive UI and all keyboard handling (`useInput`). Holds the core state: `current` folder, `cursor`, `marked` (Map path→node), `mode` (`browse` | `confirm` | `deleting`), and `history` (folder→cursor position). Renders children sorted largest-first through a scrolling viewport (`windowFor`).
 - **reclaim.js** — deletion + tree math. `topLevelMarked()` dedups overlapping marks (a file inside a marked folder is dropped). `deleteNodes()` does `fs.rm(..., {recursive, force})` and never throws — returns `{deleted, failed}`. `removeFromTree()` splices a node and subtracts its size from every ancestor in O(depth) so freed space shows immediately without rescanning.
+- **rules.js** — the auto-mark rule engine. `RULES` is an extensible registry (`{ id, label, match(node) }`) of regenerable directories (node_modules, dist, build, .next, target, __pycache__, .gradle). `findMatches(root)` walks the whole tree and returns matched nodes, stopping descent at each match so nested duplicates don't accumulate. `App.js` binds this to `r`, merging matches into the `marked` cart.
 - **format.js** — `humanSize(bytes)` and `bar(fraction, width)` display helpers.
 
 ### Key bindings (defined in App.js `useInput`)
-`↑/↓` or `k/j` move · `→/Enter/l` enter folder · `←/Backspace/h` up · `g/G` top/bottom · `Space/m` mark · `d` delete marked (confirm with `y`) · `c` clear marks · `q`/`Ctrl+C` quit.
+`↑/↓` or `k/j` move · `→/Enter/l` enter folder · `←/Backspace/h` up · `g/G` top/bottom · `Space/m` mark · `r` apply rules (auto-mark reclaimable folders) · `d` delete marked (confirm with `y`) · `c` clear marks · `q`/`Ctrl+C` quit.
 
 ## Design notes / invariants to preserve
 

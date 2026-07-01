@@ -3,6 +3,7 @@ import { Box, Text, useApp, useInput } from 'ink';
 import htm from 'htm';
 import { humanSize, bar } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
+import { findMatches } from './rules.js';
 
 const html = htm.bind(React.createElement);
 
@@ -45,6 +46,26 @@ export default function App({ root }) {
     const parent = current.parent;
     setCurrent(parent);
     setCursor(history.get(parent.path) ?? 0);
+  };
+
+  const applyRules = () => {
+    const matches = findMatches(root); // whole tree, from the scan root
+    if (matches.length === 0) {
+      setStatus('No reclaimable matches found.');
+      return;
+    }
+    const next = new Map(marked);
+    let added = 0;
+    for (const n of matches) {
+      if (!next.has(n.path)) {
+        next.set(n.path, n);
+        added += 1;
+      }
+    }
+    setMarked(next);
+    setStatus(
+      `Rules matched ${matches.length} folder(s) — added ${added}, cart now ${humanSize(reclaimableBytes(next))}.`
+    );
   };
 
   const toggleMark = (node) => {
@@ -95,6 +116,7 @@ export default function App({ root }) {
     else if (input === 'g') setCursor(0);
     else if (input === 'G') setCursor(Math.max(0, rows.length - 1));
     else if (input === ' ' || input === 'm') toggleMark(rows[cursor]);
+    else if (input === 'r') applyRules();
     else if (input === 'c' && marked.size) {
       setMarked(new Map());
       setStatus('Cleared all marks.');
@@ -157,7 +179,7 @@ export default function App({ root }) {
           ? html`<${Text} color="red" bold>${' '}Delete ${markedList.length} item(s) and free ${humanSize(reclaim)}? Press y to confirm, any other key to cancel.</${Text}>`
           : mode === 'deleting'
             ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
-            : html`<${Text} color="gray">space mark · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · q quit</${Text}>`}
+            : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;
