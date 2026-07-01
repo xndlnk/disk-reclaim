@@ -1,6 +1,6 @@
-# space-usage
+# disk-reclaim
 
-A small terminal UI (TUI) for exploring disk usage by folder — a homegrown `ncdu`,
+A small terminal UI (TUI) for exploring disk usage by folder and reclaiming space — a homegrown `ncdu`,
 built with Node.js + [Ink](https://github.com/vadimdemedes/ink).
 
 Scan a directory tree, then walk it interactively. Each folder shows its children
@@ -18,7 +18,7 @@ Or link it as a global command:
 
 ```bash
 npm link
-space-usage ~/Downloads
+disk-reclaim ~/Downloads
 ```
 
 ## Keys

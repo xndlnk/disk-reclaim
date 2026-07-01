@@ -26,6 +26,6 @@ try {
   render(html`<${App} root=${root} />`);
 } catch (err) {
   loader.unmount();
-  console.error(`space-usage: could not scan "${target}": ${err.message}`);
+  console.error(`disk-reclaim: could not scan "${target}": ${err.message}`);
   process.exit(1);
 }
