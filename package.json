@@ -1,0 +1,17 @@
+{
+  "name": "space-usage",
+  "version": "0.1.0",
+  "description": "A TUI to explore disk usage by folder, like ncdu.",
+  "type": "module",
+  "bin": {
+    "space-usage": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "htm": "^3.1.1",
+    "ink": "^5.0.1",
+    "react": "^18.3.1"
+  }
+}
