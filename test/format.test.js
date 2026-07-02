@@ -59,10 +59,10 @@ test('barColor: just below 250 MB is still yellow', () => {
   assert.equal(barColor(250 * MB - 1), 'yellow');
 });
 
-test('barColor: below 50 MB is gray', () => {
-  assert.equal(barColor(0), 'gray');
-  assert.equal(barColor(50 * MB - 1), 'gray');
-  assert.equal(barColor(1024), 'gray');
+test('barColor: below 50 MB is null (rendered dim)', () => {
+  assert.equal(barColor(0), null);
+  assert.equal(barColor(50 * MB - 1), null);
+  assert.equal(barColor(1024), null);
 });
 
 test('relativePath: nested node is shown relative to the scan root', () => {

@@ -164,20 +164,20 @@ export default function App({ root }) {
     return html`
       <${Box} flexDirection="column" borderStyle="round" borderColor="cyan" paddingX=${1}>
         <${Text} color="cyan" bold>disk-reclaim — help</${Text}>
-        <${Text} color="gray">Browse a directory tree, mark space hogs into a cart, then delete them.</${Text}>
+        <${Text} dimColor=${true}>Browse a directory tree, mark space hogs into a cart, then delete them.</${Text}>
 
         <${Box} marginTop=${1}><${Text} color="yellow" bold>Keys</${Text}></${Box}>
         ${keys.map(
           ([k, d]) => html`
-            <${Text} key=${k}><${Text} color="white">${k.padEnd(15)}</${Text}><${Text} color="gray">${d}</${Text}></${Text}>`
+            <${Text} key=${k}><${Text} color="white">${k.padEnd(15)}</${Text}><${Text} dimColor=${true}>${d}</${Text}></${Text}>`
         )}
 
         <${Box} marginTop=${1}><${Text} color="yellow" bold>What does ${'`'}r${'`'} (rules) do?</${Text}></${Box}>
-        <${Text} color="gray" wrap="wrap">Pressing ${'`'}r${'`'} scans the folder you're in and marks well-known build & cache folders — the ones below. They're safe to delete because your tools regenerate them (a rebuild, ${'`'}npm install${'`'}, etc.). Nothing is deleted until you press ${'`'}d${'`'} and confirm.</${Text}>
+        <${Text} dimColor=${true} wrap="wrap">Pressing ${'`'}r${'`'} scans the folder you're in and marks well-known build & cache folders — the ones below. They're safe to delete because your tools regenerate them (a rebuild, ${'`'}npm install${'`'}, etc.). Nothing is deleted until you press ${'`'}d${'`'} and confirm.</${Text}>
         <${Box} flexDirection="column" marginTop=${1}>
           ${RULES.map(
             (rule) => html`
-              <${Text} key=${rule.id}><${Text} color="blue">${(rule.label + '/').padEnd(16)}</${Text}><${Text} color="gray">${rule.desc}</${Text}></${Text}>`
+              <${Text} key=${rule.id}><${Text} color="blue">${(rule.label + '/').padEnd(16)}</${Text}><${Text} dimColor=${true}>${rule.desc}</${Text}></${Text}>`
           )}
         </${Box}>
 
@@ -197,27 +197,28 @@ export default function App({ root }) {
         ${view === 'largest'
           ? html`
               <${Text} key="path" color="cyan" bold>${' '}${root.path}${' '}</${Text}>
-              <${Text} key="meta" color="gray">— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
+              <${Text} key="meta" dimColor=${true}>— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
           : html`
               <${Text} key="path" color="cyan" bold>${' '}${current.path}${' '}</${Text}>
-              <${Text} key="meta" color="gray">— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
+              <${Text} key="meta" dimColor=${true}>— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
       </${Box}>
 
       <${Box} marginTop=${1}>
         <${Box} flexDirection="column" flexGrow=${1}>
           ${rows.length === 0
-            ? html`<${Text} color="gray">${'  '}(${view === 'largest' ? 'no files' : `empty${current.error ? ` — ${current.error}` : ''}`})</${Text}>`
+            ? html`<${Text} dimColor=${true}>${'  '}(${view === 'largest' ? 'no files' : `empty${current.error ? ` — ${current.error}` : ''}`})</${Text}>`
             : visible.map((child, i) => {
                 const idx = start + i;
                 const selected = idx === cursor;
                 const isMarked = marked.has(child.path);
                 const frac = child.size / total;
                 const color = isMarked ? 'yellow' : child.isDir ? 'blue' : 'white';
+                const bColor = barColor(child.size);
                 return html`
                   <${Text} key=${child.path} inverse=${selected} color=${color} wrap="truncate">
                     ${selected ? '▶' : ' '}${isMarked ? '✓' : ' '}${' '}
                     ${humanSize(child.size).padStart(9)}${' '}
-                    <${Text} color=${barColor(child.size)}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
+                    <${Text} color=${bColor ?? undefined} dimColor=${bColor === null}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
                     ${view === 'largest'
                       ? html`${relativePath(root.path, child.path)}`
                       : html`${child.isDir ? '/' : ' '}${child.name}${child.error ? ` !${child.error}` : ''}`}
@@ -230,15 +231,15 @@ export default function App({ root }) {
           <${Text}>Total: <${Text} color="yellow" bold>${humanSize(reclaim)}</${Text}></${Text}>
           <${Box} flexDirection="column" marginTop=${1}>
             ${markedList.length === 0
-              ? html`<${Text} color="gray">Nothing marked.\nPress <${Text} color="white">space</${Text}> on an item\nto add it here.</${Text}>`
+              ? html`<${Text} dimColor=${true}>Nothing marked.\nPress <${Text} color="white">space</${Text}> on an item\nto add it here.</${Text}>`
               : markedList.slice(0, viewHeight).map(
                   (n) => html`
                     <${Text} key=${n.path} wrap="truncate-middle">
-                      <${Text} color="gray">${humanSize(n.size).padStart(9)}</${Text}> ${relativePath(root.path, n.path)}${n.isDir ? '/' : ''}
+                      <${Text} dimColor=${true}>${humanSize(n.size).padStart(9)}</${Text}> ${relativePath(root.path, n.path)}${n.isDir ? '/' : ''}
                     </${Text}>`
                 )}
             ${markedList.length > viewHeight
-              ? html`<${Text} color="gray">…and ${markedList.length - viewHeight} more</${Text}>`
+              ? html`<${Text} dimColor=${true}>…and ${markedList.length - viewHeight} more</${Text}>`
               : null}
           </${Box}>
         </${Box}>
@@ -250,8 +251,8 @@ export default function App({ root }) {
           : mode === 'deleting'
             ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
             : view === 'largest'
-              ? html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · ? help · q quit</${Text}>`
-              : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · ? help · q quit</${Text}>`}
+              ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · ? help · q quit</${Text}>`
+              : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · ? help · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;

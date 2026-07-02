@@ -19,11 +19,15 @@ export function bar(fraction, width = 12) {
 
 const MB = 1024 * 1024;
 
-/** Heat color for a row by absolute size: red >= 250 MB, yellow >= 50 MB, gray below. */
+/**
+ * Heat color for a row by absolute size: red >= 250 MB, yellow >= 50 MB.
+ * Below that returns null, meaning "no explicit color" — the caller renders
+ * it dimmed (theme-adaptive) rather than a fixed gray.
+ */
 export function barColor(bytes) {
   if (bytes >= 250 * MB) return 'red';
   if (bytes >= 50 * MB) return 'yellow';
-  return 'gray';
+  return null;
 }
 
 /** A node's path relative to the scanned root, for display. Root itself -> ".". */

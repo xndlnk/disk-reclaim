@@ -15,7 +15,7 @@ let setCount;
 function Loading() {
   const [count, _setCount] = React.useState(0);
   setCount = _setCount;
-  return html`<${Box}><${Text} color="cyan">Scanning </${Text}><${Text}>${target}</${Text}><${Text} color="gray"> … ${count.toLocaleString()} files</${Text}></${Box}>`;
+  return html`<${Box}><${Text} color="cyan">Scanning </${Text}><${Text}>${target}</${Text}><${Text} dimColor=${true}> … ${count.toLocaleString()} files</${Text}></${Box}>`;
 }
 
 const loader = render(html`<${Loading} />`);
