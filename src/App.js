@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import htm from 'htm';
-import { humanSize, bar, relativePath } from './format.js';
+import { humanSize, bar, barColor, relativePath } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
 import { findMatches } from './rules.js';
 import { largestFiles, countFiles } from './largest.js';
@@ -172,7 +172,7 @@ export default function App({ root }) {
                   <${Text} key=${child.path} inverse=${selected} color=${color} wrap="truncate">
                     ${selected ? '▶' : ' '}${isMarked ? '✓' : ' '}${' '}
                     ${humanSize(child.size).padStart(9)}${' '}
-                    <${Text} color=${isMarked ? 'yellow' : 'gray'}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
+                    <${Text} color=${barColor(child.size)}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
                     ${view === 'largest'
                       ? html`${relativePath(root.path, child.path)}`
                       : html`${child.isDir ? '/' : ' '}${child.name}${child.error ? ` !${child.error}` : ''}`}

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { humanSize, bar, relativePath } from '../src/format.js';
+import { humanSize, bar, barColor, relativePath } from '../src/format.js';
 
 test('humanSize: zero and sub-1 bytes render as "0 B"', () => {
   assert.equal(humanSize(0), '0 B');
@@ -41,6 +41,28 @@ test('bar: half fills half the width', () => {
 test('bar: clamps out-of-range fractions', () => {
   assert.equal(bar(-1, 4), '[    ]');
   assert.equal(bar(2, 4), '[####]');
+});
+
+const MB = 1024 * 1024;
+
+test('barColor: >= 250 MB is red', () => {
+  assert.equal(barColor(250 * MB), 'red');
+  assert.equal(barColor(1024 * MB), 'red');
+});
+
+test('barColor: 50 MB up to 250 MB is yellow', () => {
+  assert.equal(barColor(50 * MB), 'yellow');
+  assert.equal(barColor(200 * MB), 'yellow');
+});
+
+test('barColor: just below 250 MB is still yellow', () => {
+  assert.equal(barColor(250 * MB - 1), 'yellow');
+});
+
+test('barColor: below 50 MB is gray', () => {
+  assert.equal(barColor(0), 'gray');
+  assert.equal(barColor(50 * MB - 1), 'gray');
+  assert.equal(barColor(1024), 'gray');
 });
 
 test('relativePath: nested node is shown relative to the scan root', () => {

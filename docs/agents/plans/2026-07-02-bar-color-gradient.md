@@ -122,7 +122,7 @@ Single vertical slice; no phase headers needed.
 Dependencies: None.
 
 **Tasks**:
-- [ ] Add `barColor(fraction)` to `src/format.js` as a pure helper returning a
+- [x] Add `barColor(fraction)` to `src/format.js` as a pure helper returning a
   hex string. Suggested shape:
   ```js
   // Gradient anchors: green (small) → yellow → red (big).
@@ -142,12 +142,12 @@ Dependencies: None.
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   }
   ```
-- [ ] Import `barColor` in `src/App.js` (line 4, alongside `humanSize, bar, relativePath`).
-- [ ] Replace the bar+% color in `src/App.js:175`:
+- [x] Import `barColor` in `src/App.js` (line 4, alongside `humanSize, bar, relativePath`).
+- [x] Replace the bar+% color in `src/App.js:175`:
   `color={isMarked ? 'yellow' : 'gray'}` → `color={barColor(frac)}`.
   (Leave the item-name coloring on line 170/172 unchanged — marks still show a
   yellow name and `✓`.)
-- [ ] Add `barColor` unit tests to `test/format.test.js`:
+- [x] Add `barColor` unit tests to `test/format.test.js`:
   - `barColor(0)` returns green `#3fae3f`.
   - `barColor(0.25)` returns yellow `#c9c400` (segment boundary is exact).
   - `barColor(0.5)` returns red `#d94a2b`.
@@ -155,12 +155,12 @@ Dependencies: None.
   - `barColor(-1)` returns green `#3fae3f` (clamped below 0).
   - A mid-segment value (e.g. `0.125`) is between green and yellow — assert it
     differs from both anchors and is a valid `#rrggbb` string.
-- [ ] Update `CLAUDE.md`: change the `format.js` line to list
+- [x] Update `CLAUDE.md`: change the `format.js` line to list
   `humanSize`, `bar`, `barColor`, `relativePath`.
 
 **Automated Verification**:
-- [ ] `node --test --test-name-pattern=barColor` passes.
-- [ ] `npm test` passes (full suite, no regressions).
+- [x] `node --test --test-name-pattern=barColor` passes.
+- [x] `npm test` passes (full suite, no regressions).
 
 **Manual Verification**:
 - [ ] Run `node src/index.js .` on a folder with a mix of large and small items;

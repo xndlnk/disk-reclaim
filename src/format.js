@@ -17,6 +17,15 @@ export function bar(fraction, width = 12) {
   return `[${'#'.repeat(filled)}${' '.repeat(width - filled)}]`;
 }
 
+const MB = 1024 * 1024;
+
+/** Heat color for a row by absolute size: red >= 250 MB, yellow >= 50 MB, gray below. */
+export function barColor(bytes) {
+  if (bytes >= 250 * MB) return 'red';
+  if (bytes >= 50 * MB) return 'yellow';
+  return 'gray';
+}
+
 /** A node's path relative to the scanned root, for display. Root itself -> ".". */
 export function relativePath(rootPath, nodePath) {
   const rel = path.relative(rootPath, nodePath);

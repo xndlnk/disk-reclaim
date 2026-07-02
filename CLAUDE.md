@@ -26,7 +26,7 @@ An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and le
 - **largest.js** — whole-tree "largest files" walk backing the `L` view.
 - **reclaim.js** — deletion + in-place tree math (dedup marks, delete, subtract freed size from ancestors).
 - **rules.js** — the auto-mark rule engine (`RULES` registry of regenerable dirs) behind the `r` key.
-- **format.js** — display helpers (`humanSize`, `bar`, `relativePath`).
+- **format.js** — display helpers (`humanSize`, `bar`, `barColor`, `relativePath`).
 
 Read the module for its API; the invariants below are what must survive a change.
 
