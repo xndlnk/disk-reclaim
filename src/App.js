@@ -120,7 +120,7 @@ export default function App({ root }) {
     // browse mode
     if (input === 'q' || (key.ctrl && input === 'c')) return exit();
     else if (input === '?') setShowHelp(true);
-    else if (input === 'L') {
+    else if (input === 'l') {
       if (view === 'browse') {
         history.set(current.path, cursor);
         setView('largest');
@@ -131,7 +131,7 @@ export default function App({ root }) {
       }
     } else if (key.upArrow || input === 'k') setCursor((c) => Math.max(0, c - 1));
     else if (key.downArrow || input === 'j') setCursor((c) => Math.min(rows.length - 1, c + 1));
-    else if (key.return || key.rightArrow || input === 'l') {
+    else if (key.return || key.rightArrow) {
       if (view === 'browse') enter(rows[cursor]); // no-op in largest view — nothing to open
     } else if (key.leftArrow || input === 'h' || key.backspace || key.delete) {
       if (view === 'largest') {
@@ -151,12 +151,12 @@ export default function App({ root }) {
   if (showHelp) {
     const keys = [
       ['↑/↓ · k/j', 'move the cursor'],
-      ['→/Enter/l', 'open the highlighted folder'],
+      ['→/Enter', 'open the highlighted folder'],
       ['←/Backspace/h', 'go up to the parent folder'],
       ['g / G', 'jump to top / bottom'],
       ['Space / m', 'mark item into the reclaim cart'],
       ['r', 'auto-mark reclaimable folders here (rules — see below)'],
-      ['L', 'toggle largest-files view (biggest files in the whole tree)'],
+      ['l', 'toggle largest-files view (biggest files in the whole tree)'],
       ['d', 'delete everything in the cart (asks y to confirm)'],
       ['c', 'clear the cart'],
       ['? ', 'show this help · q quit'],
@@ -251,8 +251,8 @@ export default function App({ root }) {
           : mode === 'deleting'
             ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
             : view === 'largest'
-              ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · ? help · q quit</${Text}>`
-              : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · ? help · q quit</${Text}>`}
+              ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · l browse · ? help · q quit</${Text}>`
+              : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · l largest · ? help · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;
