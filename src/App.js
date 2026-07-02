@@ -119,7 +119,7 @@ export default function App({ root }) {
 
     // browse mode
     if (input === 'q' || (key.ctrl && input === 'c')) return exit();
-    else if (input === '?') setShowHelp(true);
+    else if (input === '?' || input === 'h') setShowHelp(true);
     else if (input === 'l') {
       if (view === 'browse') {
         history.set(current.path, cursor);
@@ -133,7 +133,7 @@ export default function App({ root }) {
     else if (key.downArrow || input === 'j') setCursor((c) => Math.min(rows.length - 1, c + 1));
     else if (key.return || key.rightArrow) {
       if (view === 'browse') enter(rows[cursor]); // no-op in largest view — nothing to open
-    } else if (key.leftArrow || input === 'h' || key.backspace || key.delete) {
+    } else if (key.leftArrow || key.backspace || key.delete) {
       if (view === 'largest') {
         setView('browse');
         setCursor(history.get(current.path) ?? 0);
@@ -152,14 +152,14 @@ export default function App({ root }) {
     const keys = [
       ['↑/↓ · k/j', 'move the cursor'],
       ['→/Enter', 'open the highlighted folder'],
-      ['←/Backspace/h', 'go up to the parent folder'],
+      ['←/Backspace', 'go up to the parent folder'],
       ['g / G', 'jump to top / bottom'],
       ['Space / m', 'mark item into the reclaim cart'],
       ['r', 'auto-mark reclaimable folders here (rules — see below)'],
       ['l', 'toggle largest-files view (biggest files in the whole tree)'],
       ['d', 'delete everything in the cart (asks y to confirm)'],
       ['c', 'clear the cart'],
-      ['? ', 'show this help · q quit'],
+      ['? / h', 'show this help · q quit'],
     ];
     return html`
       <${Box} flexDirection="column" borderStyle="round" borderColor="cyan" paddingX=${1}>

@@ -45,13 +45,14 @@ A couple of Windows notes:
 | ------------------ | ---------------------------------- |
 | `↑` / `↓` (`k`/`j`)| Move the cursor                    |
 | `→` / `Enter`      | Open the selected folder           |
-| `←` / `Backspace` (`h`) | Go up to the parent           |
+| `←` / `Backspace` | Go up to the parent                |
 | `g` / `G`          | Jump to top / bottom               |
 | `Space` (`m`)      | Mark/unmark the item for reclaiming |
 | `r`                | Apply rules — auto-mark reclaimable folders |
 | `l`                | Toggle the largest-files view (top files across the whole tree) |
 | `d`                | Delete the reclaim cart (asks to confirm) |
 | `c`                | Clear all marks                    |
+| `?` / `h`          | Show the help page                 |
 | `q`                | Quit                               |
 
 In the largest-files view, `←` / `Backspace` (or `l` again) returns you to browsing

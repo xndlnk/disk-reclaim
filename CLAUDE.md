@@ -31,7 +31,7 @@ An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and le
 Read the module for its API; the invariants below are what must survive a change.
 
 ### Key bindings (defined in App.js `useInput`)
-`↑/↓` or `k/j` move · `→/Enter` enter folder · `←/Backspace/h` up · `g/G` top/bottom · `Space/m` mark · `r` apply rules (auto-mark reclaimable folders) · `l` toggle the largest-files view (top files across the whole tree) · `d` delete marked (confirm with `y`) · `c` clear marks · `q`/`Ctrl+C` quit. In the largest view, `←`/`Backspace` (and `l`) return to browse at the previous folder/cursor; `→`/`Enter` are no-ops.
+`↑/↓` or `k/j` move · `→/Enter` enter folder · `←/Backspace` up · `g/G` top/bottom · `Space/m` mark · `r` apply rules (auto-mark reclaimable folders) · `l` toggle the largest-files view (top files across the whole tree) · `d` delete marked (confirm with `y`) · `c` clear marks · `?`/`h` help · `q`/`Ctrl+C` quit. In the largest view, `←`/`Backspace` (and `l`) return to browse at the previous folder/cursor; `→`/`Enter` are no-ops.
 
 ## Design notes / invariants to preserve
 
