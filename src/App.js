@@ -181,6 +181,9 @@ export default function App({ root }) {
           )}
         </${Box}>
 
+        <${Box} marginTop=${1}><${Text} color="yellow" bold>Adding your own rules</${Text}></${Box}>
+        <${Text} dimColor=${true} wrap="wrap">Rules live in ${'`'}src/rules.js${'`'}. Add one by pushing an entry to the ${'`'}RULES${'`'} array: ${'`'}{ id, label, desc, match(node) }${'`'}. ${'`'}match${'`'} receives a node (${'`'}{ name, isDir, ... }${'`'}) and returns ${'`'}true${'`'} to mark it — e.g. ${'`'}match: (n) => n.isDir && n.name === '.venv'${'`'}. ${'`'}label${'`'} and ${'`'}desc${'`'} are what you see listed above.</${Text}>
+
         <${Box} marginTop=${1}><${Text} color="green">Press any key to return.</${Text}></${Box}>
       </${Box}>`;
   }
