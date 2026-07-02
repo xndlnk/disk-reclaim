@@ -51,7 +51,7 @@ export default function App({ root }) {
   };
 
   const applyRules = () => {
-    const matches = findMatches(root); // whole tree, from the scan root
+    const matches = findMatches(current); // from the folder the user is in
     if (matches.length === 0) {
       setStatus('No reclaimable matches found.');
       return;

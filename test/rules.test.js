@@ -27,6 +27,16 @@ test('findMatches: does not descend into a matched folder (nested dedup)', () =>
   assert.equal(result[0], outer); // only the top-level match, inner never visited
 });
 
+test('findMatches: scopes to the passed node, ignoring matches elsewhere in the tree', () => {
+  const outside = node('node_modules', { isDir: true });
+  const inside = node('node_modules', { isDir: true });
+  const sub = node('sub', { children: [inside] });
+  const tree = node('root', { children: [outside, sub] });
+  // Scanning from `sub` must find only the match within it — this is what lets
+  // `App` apply rules from the folder the user has navigated into.
+  assert.deepEqual(findMatches(sub), [inside]);
+});
+
 test('findMatches: matches the other curated folder names', () => {
   const dist = node('dist', { isDir: true });
   const next = node('.next', { isDir: true });
