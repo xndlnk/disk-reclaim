@@ -281,12 +281,12 @@ render, header/footer, cursor save/restore, and correct behavior after deletion.
   (module wiring / syntax sanity).
 
 **Manual Verification**:
-- [ ] `node src/index.js <a large tree>`: press `L` — the view switches to a flat list of the
+- [x] `node src/index.js <a large tree>`: press `L` — the view switches to a flat list of the
   50 biggest files with paths relative to the root; press `L`/`←` — returns to the same folder
   and cursor position as before.
-- [ ] In the largest view, `space` marks a file into the cart and `d`→`y` deletes it; the
+- [x] In the largest view, `space` marks a file into the cart and `d`→`y` deletes it; the
   freed space is reflected and the list/cursor stay valid afterward.
-- [ ] `→`/`Enter` do nothing in the largest view; `↑↓`/`g`/`G` move within the 50 rows; the
+- [x] `→`/`Enter` do nothing in the largest view; `↑↓`/`g`/`G` move within the 50 rows; the
   header shows the total file count and the footer shows the largest-view hints.
 
 ## Implementation Notes
