@@ -4,6 +4,7 @@ import htm from 'htm';
 import { humanSize, bar, relativePath } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
 import { findMatches } from './rules.js';
+import { largestFiles, countFiles } from './largest.js';
 
 const html = htm.bind(React.createElement);
 
@@ -26,11 +27,12 @@ export default function App({ root }) {
   const [cursor, setCursor] = useState(0);
   const [marked, setMarked] = useState(() => new Map()); // path -> node
   const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'deleting'
+  const [view, setView] = useState('browse'); // 'browse' | 'largest'
   const [status, setStatus] = useState('');
   const [history] = useState(() => new Map()); // remembered cursor per folder
 
-  const rows = sortedChildren(current);
-  const total = current.size || 1;
+  const rows = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
+  const total = (view === 'largest' ? root.size : current.size) || 1;
   const viewHeight = Math.max(3, (process.stdout.rows || 24) - 7);
 
   const enter = (target) => {
@@ -87,7 +89,8 @@ export default function App({ root }) {
     const next = new Map();
     for (const f of failed) next.set(f.node.path, f.node);
     setMarked(next);
-    setCursor((c) => Math.min(c, Math.max(0, sortedChildren(current).length - 1)));
+    const remaining = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
+    setCursor((c) => Math.min(c, Math.max(0, remaining.length - 1)));
     setStatus(
       `Freed ${humanSize(freed)} — deleted ${deleted.length} item(s)` +
         (failed.length ? `, ${failed.length} failed` : '')
@@ -109,11 +112,25 @@ export default function App({ root }) {
 
     // browse mode
     if (input === 'q' || (key.ctrl && input === 'c')) return exit();
-    else if (key.upArrow || input === 'k') setCursor((c) => Math.max(0, c - 1));
+    else if (input === 'L') {
+      if (view === 'browse') {
+        history.set(current.path, cursor);
+        setView('largest');
+        setCursor(0);
+      } else {
+        setView('browse');
+        setCursor(history.get(current.path) ?? 0);
+      }
+    } else if (key.upArrow || input === 'k') setCursor((c) => Math.max(0, c - 1));
     else if (key.downArrow || input === 'j') setCursor((c) => Math.min(rows.length - 1, c + 1));
-    else if (key.return || key.rightArrow || input === 'l') enter(rows[cursor]);
-    else if (key.leftArrow || input === 'h' || key.backspace || key.delete) goUp();
-    else if (input === 'g') setCursor(0);
+    else if (key.return || key.rightArrow || input === 'l') {
+      if (view === 'browse') enter(rows[cursor]); // no-op in largest view — nothing to open
+    } else if (key.leftArrow || input === 'h' || key.backspace || key.delete) {
+      if (view === 'largest') {
+        setView('browse');
+        setCursor(history.get(current.path) ?? 0);
+      } else goUp();
+    } else if (input === 'g') setCursor(0);
     else if (input === 'G') setCursor(Math.max(0, rows.length - 1));
     else if (input === ' ' || input === 'm') toggleMark(rows[cursor]);
     else if (input === 'r') applyRules();
@@ -127,18 +144,24 @@ export default function App({ root }) {
   const visible = rows.slice(start, end);
   const reclaim = reclaimableBytes(marked);
   const markedList = topLevelMarked(marked).sort((a, b) => b.size - a.size);
+  const fileCount = view === 'largest' ? countFiles(root) : 0;
 
   return html`
     <${Box} flexDirection="column">
       <${Box}>
-        <${Text} color="cyan" bold>${' '}${current.path}${' '}</${Text}>
-        <${Text} color="gray">— ${humanSize(current.size)}, ${rows.length} items</${Text}>
+        ${view === 'largest'
+          ? html`
+              <${Text} color="cyan" bold>${' '}${root.path}${' '}</${Text}>
+              <${Text} color="gray">— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
+          : html`
+              <${Text} color="cyan" bold>${' '}${current.path}${' '}</${Text}>
+              <${Text} color="gray">— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
       </${Box}>
 
       <${Box} marginTop=${1}>
         <${Box} flexDirection="column" flexGrow=${1}>
           ${rows.length === 0
-            ? html`<${Text} color="gray">${'  '}(empty${current.error ? ` — ${current.error}` : ''})</${Text}>`
+            ? html`<${Text} color="gray">${'  '}(${view === 'largest' ? 'no files' : `empty${current.error ? ` — ${current.error}` : ''}`})</${Text}>`
             : visible.map((child, i) => {
                 const idx = start + i;
                 const selected = idx === cursor;
@@ -150,7 +173,9 @@ export default function App({ root }) {
                     ${selected ? '▶' : ' '}${isMarked ? '✓' : ' '}${' '}
                     ${humanSize(child.size).padStart(9)}${' '}
                     <${Text} color=${isMarked ? 'yellow' : 'gray'}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
-                    ${child.isDir ? '/' : ' '}${child.name}${child.error ? ` !${child.error}` : ''}
+                    ${view === 'largest'
+                      ? html`${relativePath(root.path, child.path)}`
+                      : html`${child.isDir ? '/' : ' '}${child.name}${child.error ? ` !${child.error}` : ''}`}
                   </${Text}>`;
               })}
         </${Box}>
@@ -179,7 +204,9 @@ export default function App({ root }) {
           ? html`<${Text} color="red" bold>${' '}Delete ${markedList.length} item(s) and free ${humanSize(reclaim)}? Press y to confirm, any other key to cancel.</${Text}>`
           : mode === 'deleting'
             ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
-            : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · q quit</${Text}>`}
+            : view === 'largest'
+              ? html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · q quit</${Text}>`
+              : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;

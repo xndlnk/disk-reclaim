@@ -169,7 +169,7 @@ Add the pure whole-tree walk that returns the biggest files, with unit tests. Th
 `src/rules.js` / `test/rules.test.js` (isolated, fully unit-testable, no UI).
 
 **Tasks**:
-- [ ] Create `src/largest.js` exporting `largestFiles(root, n = 50)` and `countFiles(root)`:
+- [x] Create `src/largest.js` exporting `largestFiles(root, n = 50)` and `countFiles(root)`:
   - `largestFiles`: recursively walk from `root` (like `findMatches`), but descend fully and
     collect only leaf **file** nodes (`!node.isDir`). Do not collect directories. Sort by
     `size` descending and return the first `n`.
@@ -203,7 +203,7 @@ Add the pure whole-tree walk that returns the biggest files, with unit tests. Th
     return count;
   }
   ```
-- [ ] Create `test/largest.test.js`. Adapt the `node()` helper from `test/rules.test.js`, but
+- [x] Create `test/largest.test.js`. Adapt the `node()` helper from `test/rules.test.js`, but
   **extend it to accept a `size` option** (the rules tests never set `size`, so the original
   helper defaults `size: 0` and cannot express sort order), e.g.
   `node(name, { isDir, size = 0, children } = {})`. Cover:
@@ -216,8 +216,8 @@ Add the pure whole-tree walk that returns the biggest files, with unit tests. Th
   - `countFiles`: returns the total leaf-file count (nested), and `0` for a dir-only tree
 
 **Automated Verification**:
-- [ ] `node --test test/largest.test.js` passes
-- [ ] `npm test` passes (whole suite, no regressions)
+- [x] `node --test test/largest.test.js` passes
+- [x] `npm test` passes (whole suite, no regressions)
 
 ### Phase 2: Largest-files view in `App.js`
 
@@ -227,16 +227,16 @@ Wire the module into the UI: a `view` toggle, list/denominator selection, the ne
 render, header/footer, cursor save/restore, and correct behavior after deletion. Update docs.
 
 **Tasks**:
-- [ ] Import `largestFiles` and `countFiles` from `./largest.js` in `src/App.js`.
-- [ ] Add `const [view, setView] = useState('browse');`.
-- [ ] Select the row list and denominator by `view`:
+- [x] Import `largestFiles` and `countFiles` from `./largest.js` in `src/App.js`.
+- [x] Add `const [view, setView] = useState('browse');`.
+- [x] Select the row list and denominator by `view`:
   ```js
   const rows = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
   const total = (view === 'largest' ? root.size : current.size) || 1;
   ```
   (Replaces the current `rows`/`total` at `App.js:32-33`. `largestFiles` runs each render
   only while in largest view, so it reflects the tree after any `removeFromTree`.)
-- [ ] Add an `L` toggle in `useInput` (browse mode). Entering largest: save the browse cursor
+- [x] Add an `L` toggle in `useInput` (browse mode). Entering largest: save the browse cursor
   to `history` for `current.path`, then `setCursor(0)`. Exiting: restore
   `history.get(current.path) ?? 0`:
   ```js
@@ -245,39 +245,39 @@ render, header/footer, cursor save/restore, and correct behavior after deletion.
     else { setView('browse'); setCursor(history.get(current.path) ?? 0); }
   }
   ```
-- [ ] Gate navigation on `view` in `useInput`:
+- [x] Gate navigation on `view` in `useInput`:
   - `→`/`Enter`/`l`: only call `enter(rows[cursor])` when `view === 'browse'` (no-op in largest).
   - `←`/`h`/`Backspace`/`Delete`: when `view === 'largest'`, exit to browse (same restore as
     the `L` exit); when `view === 'browse'`, keep `goUp()`.
   - `↑↓`/`k`/`j`, `g`/`G`, `space`/`m`, `r`, `c`, `d`, `q` remain unchanged (they already act
     on `rows`/`marked`, which now carry the largest-view items).
-- [ ] Header render: when `view === 'largest'`, show `root.path` + `largest 50 files` and a
+- [x] Header render: when `view === 'largest'`, show `root.path` + `largest 50 files` and a
   `(of N files)` note, where `N = countFiles(root)` (from Phase 1). Only show the note when
   `N > 50`. Example:
   ```
   <root.path> — largest 50 files (of 8,412 files)
   ```
-- [ ] Per-row render: when `view === 'largest'`, render the location via
+- [x] Per-row render: when `view === 'largest'`, render the location via
   `relativePath(root.path, child.path)` instead of `/name`, and keep the markers +
   `humanSize` + `bar(child.size / total)` + `%` columns. Keep the browse row branch as-is.
   Files are never dirs here, so omit the `/` dir prefix in this branch.
-- [ ] Footer render: when `view === 'largest'`, show
+- [x] Footer render: when `view === 'largest'`, show
   `space mark · d delete cart · c clear · ↑↓ move · ← back · L browse · q quit`; in browse
   view append `L largest` to the existing hint line.
-- [ ] Confirm cursor clamping after deletion covers both views: the existing
+- [x] Confirm cursor clamping after deletion covers both views: the existing
   `setCursor((c) => Math.min(c, Math.max(0, sortedChildren(current).length - 1)))` in
   `performDelete` (`App.js:90`) is browse-scoped. Update it to clamp against the active
   view's row count (compute the active length from `view`) so the cursor stays in range after
   deleting from the largest view.
-- [ ] Update `CLAUDE.md`:
+- [x] Update `CLAUDE.md`:
   - Architecture: add a bullet for `src/largest.js` (`largestFiles(root, n)` — whole-tree
     top-N files walk) and mention the `view` axis in the `App.js` bullet.
   - Key bindings: add `L largest (top files across the whole tree)` and the `← back` behavior
     in the largest view.
 
 **Automated Verification**:
-- [ ] `npm test` passes (no regressions; `largest.js` covered by Phase 1 tests).
-- [ ] `node -e "import('./src/App.js').then(()=>console.log('ok'))"` imports without error
+- [x] `npm test` passes (no regressions; `largest.js` covered by Phase 1 tests).
+- [x] `node -e "import('./src/App.js').then(()=>console.log('ok'))"` imports without error
   (module wiring / syntax sanity).
 
 **Manual Verification**:
