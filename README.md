@@ -5,7 +5,10 @@ built with Node.js + [Ink](https://github.com/vadimdemedes/ink).
 
 Scan a directory tree, then walk it interactively. Each folder shows its children
 sorted largest-first, with a proportional bar and percentage, so the space hogs
-jump straight to the top.
+jump straight to the top. The bars are color-coded by absolute size — red for
+large items, yellow for medium, gray for small — so the heavy hitters stand out at
+a glance. Or press `L` for a flat "largest files" view that surfaces the biggest
+files anywhere in the tree without hunting folder by folder.
 
 ## Usage
 
@@ -31,9 +34,14 @@ disk-reclaim ~/Downloads
 | `g` / `G`          | Jump to top / bottom               |
 | `Space` (`m`)      | Mark/unmark the item for reclaiming |
 | `r`                | Apply rules — auto-mark reclaimable folders |
+| `L`                | Toggle the largest-files view (top files across the whole tree) |
 | `d`                | Delete the reclaim cart (asks to confirm) |
 | `c`                | Clear all marks                    |
 | `q`                | Quit                               |
+
+In the largest-files view, `←` / `Backspace` (or `L` again) returns you to browsing
+at the folder and cursor you left; `→` / `Enter` do nothing there since there's
+nothing to open.
 
 ## Reclaiming space
 
@@ -59,6 +67,16 @@ any deeper, so nested copies don't pile up. Review the cart and press `d` when
 you're ready. Rules live in `src/rules.js` as an extensible `RULES` registry —
 add a `{ id, label, match(node) }` entry to teach it a new pattern.
 
+### Finding the largest files
+
+Browsing folder by folder is great for structure, but a single giant file buried
+deep in the tree can hide from you. Press `L` to switch to the **largest-files
+view**: a flat list of the top 50 files anywhere under the scanned root, sorted
+largest-first, each labelled with its path relative to the root. The header notes
+how many files were scanned in total (e.g. "largest 50 files (of 12,904 files)").
+You can mark, apply rules, and delete from this view just like when browsing —
+press `L` again (or `←`) to return exactly where you left off.
+
 ## How it works
 
 - **`src/scan.js`** — recursively walks the tree with `fs.lstat` (symlinks are
@@ -68,7 +86,10 @@ add a `{ id, label, match(node) }` entry to teach it a new pattern.
   cursor navigation and a viewport that keeps the cursor on screen.
 - **`src/rules.js`** — the rule registry and `findMatches` walker behind the `r`
   auto-mark command.
-- **`src/format.js`** — human-readable byte sizes and the proportion bars.
+- **`src/largest.js`** — the whole-tree walk (`largestFiles`, `countFiles`) that
+  backs the `L` largest-files view.
+- **`src/format.js`** — human-readable byte sizes, the proportion bars, and
+  `barColor`, which maps a size to red / yellow / gray heat thresholds.
 
 ## Possible next steps
 
