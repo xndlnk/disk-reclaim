@@ -24,6 +24,21 @@ npm link
 disk-reclaim ~/Downloads
 ```
 
+## Compatibility
+
+Runs on **macOS, Linux, and Windows** — it uses only portable Node core APIs
+(`node:fs`, `node:path`) and Ink, with no shell-outs or POSIX-only assumptions.
+Requires Node 18+ (for top-level `await` and `fs.rm`).
+
+A couple of Windows notes:
+
+- Use a modern terminal (**Windows Terminal** or **PowerShell 7**) for the box
+  borders, colors, and inverse-video cursor to render correctly; the legacy
+  `cmd.exe` console can look rough.
+- The scan skips symlinks but **descends into directory junctions**, since Node's
+  `isSymbolicLink()` doesn't flag them. This is rare in practice but can affect
+  totals if a junction points back into the scanned tree.
+
 ## Keys
 
 | Key                | Action                             |
