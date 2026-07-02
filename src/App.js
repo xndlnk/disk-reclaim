@@ -151,11 +151,11 @@ export default function App({ root }) {
       <${Box}>
         ${view === 'largest'
           ? html`
-              <${Text} color="cyan" bold>${' '}${root.path}${' '}</${Text}>
-              <${Text} color="gray">— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
+              <${Text} key="path" color="cyan" bold>${' '}${root.path}${' '}</${Text}>
+              <${Text} key="meta" color="gray">— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
           : html`
-              <${Text} color="cyan" bold>${' '}${current.path}${' '}</${Text}>
-              <${Text} color="gray">— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
+              <${Text} key="path" color="cyan" bold>${' '}${current.path}${' '}</${Text}>
+              <${Text} key="meta" color="gray">— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
       </${Box}>
 
       <${Box} marginTop=${1}>
