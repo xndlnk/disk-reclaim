@@ -67,3 +67,10 @@ test('RULES: every rule exposes id, label, and a match function', () => {
     assert.equal(typeof rule.match, 'function');
   }
 });
+
+test('RULES: every rule has a non-empty desc for the help page', () => {
+  for (const rule of RULES) {
+    assert.equal(typeof rule.desc, 'string', `${rule.id} is missing a desc`);
+    assert.ok(rule.desc.length > 0, `${rule.id} has an empty desc`);
+  }
+});

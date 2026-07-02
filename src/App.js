@@ -3,7 +3,7 @@ import { Box, Text, useApp, useInput } from 'ink';
 import htm from 'htm';
 import { humanSize, bar, barColor, relativePath } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
-import { findMatches } from './rules.js';
+import { findMatches, RULES } from './rules.js';
 import { largestFiles, countFiles } from './largest.js';
 
 const html = htm.bind(React.createElement);
@@ -29,6 +29,7 @@ export default function App({ root }) {
   const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'deleting'
   const [view, setView] = useState('browse'); // 'browse' | 'largest'
   const [status, setStatus] = useState('');
+  const [showHelp, setShowHelp] = useState(false);
   const [history] = useState(() => new Map()); // remembered cursor per folder
 
   const rows = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
@@ -101,6 +102,12 @@ export default function App({ root }) {
   useInput((input, key) => {
     if (mode === 'deleting') return;
 
+    if (showHelp) {
+      if (key.ctrl && input === 'c') return exit();
+      setShowHelp(false); // any key dismisses the help page
+      return;
+    }
+
     if (mode === 'confirm') {
       if (input === 'y' || input === 'Y') performDelete();
       else {
@@ -112,6 +119,7 @@ export default function App({ root }) {
 
     // browse mode
     if (input === 'q' || (key.ctrl && input === 'c')) return exit();
+    else if (input === '?') setShowHelp(true);
     else if (input === 'L') {
       if (view === 'browse') {
         history.set(current.path, cursor);
@@ -139,6 +147,43 @@ export default function App({ root }) {
       setStatus('Cleared all marks.');
     } else if (input === 'd' && marked.size) setMode('confirm');
   });
+
+  if (showHelp) {
+    const keys = [
+      ['↑/↓ · k/j', 'move the cursor'],
+      ['→/Enter/l', 'open the highlighted folder'],
+      ['←/Backspace/h', 'go up to the parent folder'],
+      ['g / G', 'jump to top / bottom'],
+      ['Space / m', 'mark item into the reclaim cart'],
+      ['r', 'auto-mark reclaimable folders here (rules — see below)'],
+      ['L', 'toggle largest-files view (biggest files in the whole tree)'],
+      ['d', 'delete everything in the cart (asks y to confirm)'],
+      ['c', 'clear the cart'],
+      ['? ', 'show this help · q quit'],
+    ];
+    return html`
+      <${Box} flexDirection="column" borderStyle="round" borderColor="cyan" paddingX=${1}>
+        <${Text} color="cyan" bold>disk-reclaim — help</${Text}>
+        <${Text} color="gray">Browse a directory tree, mark space hogs into a cart, then delete them.</${Text}>
+
+        <${Box} marginTop=${1}><${Text} color="yellow" bold>Keys</${Text}></${Box}>
+        ${keys.map(
+          ([k, d]) => html`
+            <${Text} key=${k}><${Text} color="white">${k.padEnd(15)}</${Text}><${Text} color="gray">${d}</${Text}></${Text}>`
+        )}
+
+        <${Box} marginTop=${1}><${Text} color="yellow" bold>What does ${'`'}r${'`'} (rules) do?</${Text}></${Box}>
+        <${Text} color="gray" wrap="wrap">Pressing ${'`'}r${'`'} scans the folder you're in and marks well-known build & cache folders — the ones below. They're safe to delete because your tools regenerate them (a rebuild, ${'`'}npm install${'`'}, etc.). Nothing is deleted until you press ${'`'}d${'`'} and confirm.</${Text}>
+        <${Box} flexDirection="column" marginTop=${1}>
+          ${RULES.map(
+            (rule) => html`
+              <${Text} key=${rule.id}><${Text} color="blue">${(rule.label + '/').padEnd(16)}</${Text}><${Text} color="gray">${rule.desc}</${Text}></${Text}>`
+          )}
+        </${Box}>
+
+        <${Box} marginTop=${1}><${Text} color="green">Press any key to return.</${Text}></${Box}>
+      </${Box}>`;
+  }
 
   const { start, end } = windowFor(cursor, rows.length, viewHeight);
   const visible = rows.slice(start, end);
@@ -205,8 +250,8 @@ export default function App({ root }) {
           : mode === 'deleting'
             ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
             : view === 'largest'
-              ? html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · q quit</${Text}>`
-              : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · q quit</${Text}>`}
+              ? html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · L browse · ? help · q quit</${Text}>`
+              : html`<${Text} color="gray">space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · L largest · ? help · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;
