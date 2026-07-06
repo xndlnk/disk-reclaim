@@ -11,11 +11,12 @@ import path from 'node:path';
  * We use lstat (not stat) so symlinks are counted as their own tiny size
  * and never followed — this avoids double-counting and infinite loops.
  *
- * `onProgress` is called with the running file count so the UI can show
- * a live counter while a large tree is being walked.
+ * `onProgress({ files, bytes })` is called with the running file count and
+ * bytes seen so far, so the UI can show a live counter while a large tree is
+ * being walked.
  */
 export async function scan(dir, onProgress) {
-  const counter = { files: 0 };
+  const counter = { files: 0, bytes: 0 };
   const absolute = path.resolve(dir);
   const root = await walk(absolute, path.basename(absolute) || absolute, null, counter, onProgress);
   return root;
@@ -35,7 +36,9 @@ async function walk(nodePath, name, parent, counter, onProgress) {
   if (!stat.isDirectory()) {
     node.size = stat.size;
     counter.files += 1;
-    if (onProgress && counter.files % 500 === 0) onProgress(counter.files);
+    counter.bytes += stat.size;
+    if (onProgress && counter.files % 500 === 0)
+      onProgress({ files: counter.files, bytes: counter.bytes });
     return node;
   }
 
