@@ -17,16 +17,19 @@ const target = process.argv[2] || process.cwd();
 const FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 let setProgress;
 function Loading() {
-  const [{ files, bytes }, _setProgress] = React.useState({ files: 0, bytes: 0 });
+  const [{ files, bytes, dir }, _setProgress] = React.useState({ files: 0, bytes: 0, dir: '' });
   const [frame, setFrame] = React.useState(0);
   setProgress = _setProgress;
   React.useEffect(() => {
     const id = setInterval(() => setFrame((f) => (f + 1) % FRAMES.length), 80);
     return () => clearInterval(id);
   }, []);
-  return html`<${Box}>
-    <${Text} color="cyan">${FRAMES[frame]} Scanning </${Text}><${Text}>${target}</${Text}>
-    <${Text} dimColor=${true}> … ${files.toLocaleString()} files, ${humanSize(bytes)}</${Text}>
+  return html`<${Box} flexDirection="column">
+    <${Box}>
+      <${Text} color="cyan">${FRAMES[frame]} Scanning </${Text}><${Text}>${target}</${Text}>
+      <${Text} dimColor=${true}> … ${files.toLocaleString()} files, ${humanSize(bytes)}</${Text}>
+    </${Box}>
+    <${Text} dimColor=${true} wrap="truncate-middle">${'  '}${dir || target}</${Text}>
   </${Box}>`;
 }
 
