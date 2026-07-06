@@ -65,13 +65,21 @@ test('deleteNodes: removes real files and dirs from disk', async () => {
   await fs.writeFile(path.join(dir, 'nested.txt'), 'data');
   await fs.writeFile(file, 'data');
 
-  const nodes = [{ path: dir }, { path: file }];
-  const { deleted, failed } = await deleteNodes(nodes);
+  const nodes = [{ path: dir, size: 4 }, { path: file, size: 4 }];
+  const updates = [];
+  const { deleted, failed } = await deleteNodes(nodes, (p) => updates.push(p));
 
   assert.equal(deleted.length, 2);
   assert.equal(failed.length, 0);
   await assert.rejects(fs.stat(dir)); // recursively removed
   await assert.rejects(fs.stat(file));
+
+  // Progress is reported per cart item: total is the item count and the final
+  // update lands at done === total with the full byte count freed.
+  const last = updates.at(-1);
+  assert.equal(last.total, 2);
+  assert.equal(last.done, 2);
+  assert.equal(last.freed, 8);
   // Note: the failure path isn't exercised here — fs.rm uses { force: true },
   // so provoking a real failure is platform-dependent and left uncovered.
 });

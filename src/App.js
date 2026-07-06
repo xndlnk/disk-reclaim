@@ -29,6 +29,7 @@ export default function App({ root }) {
   const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'deleting'
   const [view, setView] = useState('browse'); // 'browse' | 'largest'
   const [status, setStatus] = useState('');
+  const [progress, setProgress] = useState(null); // { done, total, freed } while deleting
   const [showHelp, setShowHelp] = useState(false);
   const [history] = useState(() => new Map()); // remembered cursor per folder
 
@@ -83,7 +84,11 @@ export default function App({ root }) {
   const performDelete = async () => {
     setMode('deleting');
     const targets = topLevelMarked(marked);
-    const { deleted, failed } = await deleteNodes(targets);
+    setProgress({ done: 0, total: 0, freed: 0 });
+    const { deleted, failed } = await deleteNodes(targets, ({ done, total, freed }) =>
+      setProgress({ done, total, freed })
+    );
+    setProgress(null);
     const freed = deleted.reduce((s, n) => s + n.size, 0);
     for (const n of deleted) removeFromTree(n);
     // Keep only the failed ones marked so the user can see what didn't delete.
@@ -252,7 +257,7 @@ export default function App({ root }) {
         ${mode === 'confirm'
           ? html`<${Text} color="red" bold>${' '}Delete ${markedList.length} item(s) and free ${humanSize(reclaim)}? Press y to confirm, any other key to cancel.</${Text}>`
           : mode === 'deleting'
-            ? html`<${Text} color="yellow">${' '}Deleting…</${Text}>`
+            ? html`<${Text} color="yellow">${' '}Deleting… ${progress ? `${progress.done}/${progress.total}` : ''}${' '}<${Text} dimColor=${true}>${progress && progress.total ? `${bar(progress.done / progress.total)} ${humanSize(progress.freed)} freed` : ''}</${Text}></${Text}>`
             : view === 'largest'
               ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · l browse · h help · q quit</${Text}>`
               : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · l largest · h help · q quit</${Text}>`}

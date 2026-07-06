@@ -27,17 +27,27 @@ export function reclaimableBytes(markedMap) {
  * Delete each node from disk. Folders are removed recursively.
  * Returns { deleted: node[], failed: {node, error}[] } — we never throw so a
  * single permission error doesn't abort the whole batch.
+ *
+ * `onProgress({ done, total, freed })` is called after each item so the caller
+ * can render a progress bar. Granularity is per cart item (a whole folder counts
+ * as one step); `done` counts attempts (successes and failures) and `freed` is
+ * the bytes reclaimed so far.
  */
-export async function deleteNodes(nodes) {
+export async function deleteNodes(nodes, onProgress) {
   const deleted = [];
   const failed = [];
+  const total = nodes.length;
+  let freed = 0;
+  onProgress?.({ done: 0, total, freed }); // seed with the real total up front
   for (const node of nodes) {
     try {
       await fs.rm(node.path, { recursive: true, force: true });
       deleted.push(node);
+      freed += node.size || 0;
     } catch (err) {
       failed.push({ node, error: err.code || err.message });
     }
+    onProgress?.({ done: deleted.length + failed.length, total, freed });
   }
   return { deleted, failed };
 }
