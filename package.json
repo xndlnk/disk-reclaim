@@ -2,6 +2,7 @@
   "name": "disk-reclaim",
   "version": "0.1.0",
   "description": "A TUI to explore disk usage by folder and reclaim space, like ncdu.",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "disk-reclaim": "src/index.js"
