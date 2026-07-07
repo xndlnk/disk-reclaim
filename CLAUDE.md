@@ -15,7 +15,7 @@ npm test                    # run the test suite (node --test, built-in runner)
 node --test --test-name-pattern=humanSize   # run a single test by name
 ```
 
-There is no build step or linter. Tests use Node's built-in runner (`node:test` + `node:assert`, no devDependencies) and live in `test/*.test.js`, covering the logic/filesystem modules (`format.js`, `reclaim.js`, `scan.js`, `rules.js`, `largest.js`); the `App.js` Ink UI is not yet tested. Source is plain ES modules (`"type": "module"`) run directly by Node.
+There is no build step or linter. Tests use Node's built-in runner (`node:test` + `node:assert`, no devDependencies) and live in `test/*.test.js`, covering the logic/filesystem modules (`format.js`, `reclaim.js`, `scan.js`, `rules.js`, `largest.js`) and the pure UI screens (`HelpScreen.js`, `ExplosionScreen.js`). The pure screens are rendered to plain text via `test-support/render.js` (mounts an Ink element against a fake stdout and strips ANSI — no test-renderer dependency); that helper lives outside `test/` so the runner doesn't collect it as a test file. `BrowseView.js` and the stateful `App.js` container are not yet tested. Source is plain ES modules (`"type": "module"`) run directly by Node.
 
 ## Architecture
 
