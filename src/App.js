@@ -1,12 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import htm from 'htm';
 import { humanSize, bar, barColor, relativePath } from './format.js';
 import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
 import { findMatches, RULES } from './rules.js';
 import { largestFiles, countFiles } from './largest.js';
+import { boomGrid, BOOM_STEPS } from './boom.js';
 
 const html = htm.bind(React.createElement);
+
+/** Overwrite `base` with `text` starting at column `startCol` (for centered overlays). */
+function overlayLine(base, text, startCol) {
+  const chars = base.split('');
+  for (let i = 0; i < text.length; i++) {
+    const c = startCol + i;
+    if (c >= 0 && c < chars.length) chars[c] = text[i];
+  }
+  return chars.join('');
+}
 
 /** Children sorted largest-first — the whole point of the tool. */
 function sortedChildren(node) {
@@ -26,10 +37,11 @@ export default function App({ root }) {
   const [current, setCurrent] = useState(root);
   const [cursor, setCursor] = useState(0);
   const [marked, setMarked] = useState(() => new Map()); // path -> node
-  const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'deleting'
+  const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'exploding' | 'boom-done'
+  const [boomFrame, setBoomFrame] = useState(0); // mushroom-cloud step while mode === 'exploding'
+  const [summary, setSummary] = useState(null); // { freed, deletedCount, failedCount } shown on 'boom-done'
   const [view, setView] = useState('browse'); // 'browse' | 'largest'
   const [status, setStatus] = useState('');
-  const [progress, setProgress] = useState(null); // { done, total, freed } while deleting
   const [showHelp, setShowHelp] = useState(false);
   const [history] = useState(() => new Map()); // remembered cursor per folder
 
@@ -81,14 +93,11 @@ export default function App({ root }) {
     setStatus('');
   };
 
+  // Delete the cart and update the tree in place. Returns a summary; the caller
+  // (the explosion effect) owns the mode transition so the animation can cover it.
   const performDelete = async () => {
-    setMode('deleting');
     const targets = topLevelMarked(marked);
-    setProgress({ done: 0, total: 0, freed: 0 });
-    const { deleted, failed } = await deleteNodes(targets, ({ done, total, freed }) =>
-      setProgress({ done, total, freed })
-    );
-    setProgress(null);
+    const { deleted, failed } = await deleteNodes(targets, () => {});
     const freed = deleted.reduce((s, n) => s + n.size, 0);
     for (const n of deleted) removeFromTree(n);
     // Keep only the failed ones marked so the user can see what didn't delete.
@@ -97,15 +106,51 @@ export default function App({ root }) {
     setMarked(next);
     const remaining = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
     setCursor((c) => Math.min(c, Math.max(0, remaining.length - 1)));
-    setStatus(
-      `Freed ${humanSize(freed)} — deleted ${deleted.length} item(s)` +
-        (failed.length ? `, ${failed.length} failed` : '')
-    );
-    setMode('browse');
+    return { freed, deletedCount: deleted.length, failedCount: failed.length };
   };
 
+  // On 'exploding': grow the mushroom cloud while the delete runs (with a short
+  // floor so it's always visible), holding at full height once risen, then freeze
+  // on the settled smoke frame and show the summary.
+  useEffect(() => {
+    if (mode !== 'exploding') return;
+    let cancelled = false;
+    const id = setInterval(() => setBoomFrame((f) => Math.min(f + 1, BOOM_STEPS - 2)), 90);
+    (async () => {
+      const [result] = await Promise.all([
+        performDelete(),
+        new Promise((r) => setTimeout(r, 900)),
+      ]);
+      if (cancelled) return;
+      clearInterval(id);
+      setBoomFrame(BOOM_STEPS - 1); // freeze on the settled smoke
+      setSummary(result);
+      setMode('boom-done');
+    })();
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+    // performDelete closes over the marks captured when we entered 'exploding'.
+  }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useInput((input, key) => {
-    if (mode === 'deleting') return;
+    if (mode === 'exploding') {
+      if (key.ctrl && input === 'c') return exit();
+      return; // ignore everything while the boom is playing
+    }
+
+    if (mode === 'boom-done') {
+      if (key.ctrl && input === 'c') return exit();
+      // Any key clears the explosion and returns to browsing.
+      setStatus(
+        `Freed ${humanSize(summary.freed)} — deleted ${summary.deletedCount} item(s)` +
+          (summary.failedCount ? `, ${summary.failedCount} failed` : '')
+      );
+      setSummary(null);
+      setMode('browse');
+      return;
+    }
 
     if (showHelp) {
       if (key.ctrl && input === 'c') return exit();
@@ -114,8 +159,10 @@ export default function App({ root }) {
     }
 
     if (mode === 'confirm') {
-      if (input === 'y' || input === 'Y') performDelete();
-      else {
+      if (input === 'y' || input === 'Y') {
+        setBoomFrame(0);
+        setMode('exploding'); // the effect plays the boom, runs the delete, then freezes
+      } else {
         setMode('browse');
         setStatus('Deletion cancelled.');
       }
@@ -193,6 +240,46 @@ export default function App({ root }) {
       </${Box}>`;
   }
 
+  if (mode === 'exploding' || mode === 'boom-done') {
+    const last = mode === 'boom-done';
+    const cols = process.stdout.columns || 80;
+    const H = (process.stdout.rows || 24) - 1;
+    const { lines, colors } = boomGrid(cols, H, boomFrame, last);
+    const summaryRows = new Set();
+    if (last && summary) {
+      // Compose a framed plate over the smoke, centered on screen.
+      const body = [
+        'R E C L A I M E D',
+        '',
+        `Freed  ${humanSize(summary.freed)}`,
+        `Deleted  ${summary.deletedCount} item(s)` +
+          (summary.failedCount ? `   (${summary.failedCount} failed)` : ''),
+        '',
+        'press any key to return',
+      ];
+      const w = Math.max(...body.map((s) => s.length));
+      const plate = [
+        '┌' + '─'.repeat(w + 2) + '┐',
+        ...body.map((s) => '│ ' + s.padStart(Math.floor((w + s.length) / 2)).padEnd(w) + ' │'),
+        '└' + '─'.repeat(w + 2) + '┘',
+      ];
+      const top = Math.max(0, Math.floor((H - plate.length) / 2));
+      plate.forEach((line, i) => {
+        const row = top + i;
+        if (row < 0 || row >= lines.length) return;
+        lines[row] = overlayLine(lines[row], line, Math.floor((cols - line.length) / 2));
+        summaryRows.add(row);
+      });
+    }
+    return html`
+      <${Box} flexDirection="column">
+        ${lines.map((line, r) => {
+          const isSummary = summaryRows.has(r);
+          return html`<${Text} key=${r} color=${isSummary ? 'greenBright' : colors[r]} bold=${isSummary} wrap="truncate">${line}</${Text}>`;
+        })}
+      </${Box}>`;
+  }
+
   const { start, end } = windowFor(cursor, rows.length, viewHeight);
   const visible = rows.slice(start, end);
   const reclaim = reclaimableBytes(marked);
@@ -256,11 +343,9 @@ export default function App({ root }) {
       <${Box} marginTop=${1} flexDirection="column">
         ${mode === 'confirm'
           ? html`<${Text} color="red" bold>${' '}Delete ${markedList.length} item(s) and free ${humanSize(reclaim)}? Press y to confirm, any other key to cancel.</${Text}>`
-          : mode === 'deleting'
-            ? html`<${Text} color="yellow">${' '}Deleting… ${progress ? `${progress.done}/${progress.total}` : ''}${' '}<${Text} dimColor=${true}>${progress && progress.total ? `${bar(progress.done / progress.total)} ${humanSize(progress.freed)} freed` : ''}</${Text}></${Text}>`
-            : view === 'largest'
-              ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · l browse · h help · q quit</${Text}>`
-              : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · l largest · h help · q quit</${Text}>`}
+          : view === 'largest'
+            ? html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · ← back · l browse · h help · q quit</${Text}>`
+            : html`<${Text} dimColor=${true}>space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · l largest · h help · q quit</${Text}>`}
         ${status ? html`<${Text} color="green">${' '}${status}</${Text}>` : null}
       </${Box}>
     </${Box}>`;
