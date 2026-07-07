@@ -10,6 +10,9 @@ import { playBoom } from './sound.js';
 
 const html = htm.bind(React.createElement);
 
+/** How many files the largest-files view collects/shows. */
+const LARGEST_LIMIT = 50;
+
 /** Overwrite `base` with `text` starting at column `startCol` (for centered overlays). */
 function overlayLine(base, text, startCol) {
   const chars = base.split('');
@@ -46,7 +49,10 @@ export default function App({ root, sound = true }) {
   const [showHelp, setShowHelp] = useState(false);
   const [history] = useState(() => new Map()); // remembered cursor per folder
 
-  const rows = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
+  // The list under the cursor: whole-tree largest files, or the current folder's children.
+  const currentRows = () =>
+    view === 'largest' ? largestFiles(root, LARGEST_LIMIT) : sortedChildren(current);
+  const rows = currentRows();
   const total = (view === 'largest' ? root.size : current.size) || 1;
   const viewHeight = Math.max(3, (process.stdout.rows || 24) - 7);
 
@@ -105,7 +111,7 @@ export default function App({ root, sound = true }) {
     const next = new Map();
     for (const f of failed) next.set(f.node.path, f.node);
     setMarked(next);
-    const remaining = view === 'largest' ? largestFiles(root, 50) : sortedChildren(current);
+    const remaining = currentRows();
     setCursor((c) => Math.min(c, Math.max(0, remaining.length - 1)));
     return { freed, deletedCount: deleted.length, failedCount: failed.length };
   };
@@ -294,7 +300,7 @@ export default function App({ root, sound = true }) {
         ${view === 'largest'
           ? html`
               <${Text} key="path" color="cyan" bold>${' '}${root.path}${' '}</${Text}>
-              <${Text} key="meta" dimColor=${true}>— largest ${rows.length} files${fileCount > 50 ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
+              <${Text} key="meta" dimColor=${true}>— largest ${rows.length} files${fileCount > LARGEST_LIMIT ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
           : html`
               <${Text} key="path" color="cyan" bold>${' '}${current.path}${' '}</${Text}>
               <${Text} key="meta" dimColor=${true}>— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
