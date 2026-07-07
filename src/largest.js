@@ -7,8 +7,11 @@
  * bottom naturally and are not specially filtered.
  */
 
+/** How many files the largest-files view collects and shows. */
+export const LARGEST_LIMIT = 50;
+
 /** Collect leaf file nodes anywhere under `root`, sorted largest-first, capped at `n`. */
-export function largestFiles(root, n = 50) {
+export function largestFiles(root, n = LARGEST_LIMIT) {
   const files = [];
   const visit = (node) => {
     if (!node) return;
