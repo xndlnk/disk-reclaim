@@ -44,7 +44,7 @@ export default function App({ root, sound = true }) {
   const [mode, setMode] = useState('browse'); // 'browse' | 'confirm' | 'exploding' | 'boom-done'
   const [boomFrame, setBoomFrame] = useState(0); // mushroom-cloud step while mode === 'exploding'
   const [summary, setSummary] = useState(null); // { freed, deletedCount, failedCount } shown on 'boom-done'
-  const [view, setView] = useState('browse'); // 'browse' | 'largest'
+  const [view, setView] = useState('tree'); // 'tree' | 'largest' — which list is shown
   const [status, setStatus] = useState('');
   const [showHelp, setShowHelp] = useState(false);
   const [history] = useState(() => new Map()); // remembered cursor per folder
@@ -181,21 +181,21 @@ export default function App({ root, sound = true }) {
     if (input === 'q' || (key.ctrl && input === 'c')) return exit();
     else if (input === '?' || input === 'h') setShowHelp(true);
     else if (input === 'l') {
-      if (view === 'browse') {
+      if (view === 'tree') {
         history.set(current.path, cursor);
         setView('largest');
         setCursor(0);
       } else {
-        setView('browse');
+        setView('tree');
         setCursor(history.get(current.path) ?? 0);
       }
     } else if (key.upArrow || input === 'k') setCursor((c) => Math.max(0, c - 1));
     else if (key.downArrow || input === 'j') setCursor((c) => Math.min(rows.length - 1, c + 1));
     else if (key.return || key.rightArrow) {
-      if (view === 'browse') enter(rows[cursor]); // no-op in largest view — nothing to open
+      if (view === 'tree') enter(rows[cursor]); // no-op in largest view — nothing to open
     } else if (key.leftArrow || key.backspace || key.delete) {
       if (view === 'largest') {
-        setView('browse');
+        setView('tree');
         setCursor(history.get(current.path) ?? 0);
       } else goUp();
     } else if (input === 'g') setCursor(0);
