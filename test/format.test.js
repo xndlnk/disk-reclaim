@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { humanSize, bar, barColor, relativePath } from '../src/format.js';
+import { humanSize, bar, barColor, relativePath, nfc } from '../src/format.js';
 
 test('humanSize: zero and sub-1 bytes render as "0 B"', () => {
   assert.equal(humanSize(0), '0 B');
@@ -75,4 +75,19 @@ test('relativePath: a direct child is just its name', () => {
 
 test('relativePath: the root itself renders as "."', () => {
   assert.equal(relativePath('/scan', '/scan'), '.');
+});
+
+test('nfc: precomposes a decomposed umlaut so display width is correct', () => {
+  // "für" written NFD: f, u, combining diaeresis (U+0308), r — 4 code points.
+  const decomposed = 'für';
+  assert.equal(decomposed.length, 4);
+  const composed = nfc(decomposed);
+  assert.equal(composed, 'für');
+  assert.equal(composed.length, 3); // single precomposed ü (U+00FC)
+});
+
+test('relativePath: normalizes NFD names to NFC for display', () => {
+  const rel = relativePath('/scan', '/scan/für');
+  assert.equal(rel, 'für');
+  assert.equal(rel.length, 3);
 });

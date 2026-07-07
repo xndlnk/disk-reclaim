@@ -137,6 +137,18 @@ test('BrowseView: cart truncates past viewHeight with an "…and N more" note', 
   assert.match(out, /…and 3 more/);
 });
 
+test('BrowseView: an NFD umlaut name is precomposed to NFC in list and cart', () => {
+  // On disk the name arrives decomposed: "für" as f, u, U+0308, r. The combining
+  // mark renders in its own cell in many terminals and knocks the cart border
+  // one column off — so display strings must be precomposed before layout.
+  const root = dir('scan', null);
+  const nfd = 'für';
+  const f = file(nfd, root, 40);
+  const out = render({ root, current: root, rows: [f], total: 40, marked: new Map([[f.path, f]]) });
+  assert.ok(!out.includes('̈'), 'no combining diaeresis should survive to the screen');
+  assert.ok(out.includes('für'), 'name renders with the precomposed ü (U+00FC)');
+});
+
 // --- largest view --------------------------------------------------------
 
 test('BrowseView: largest view shows the root, a files header, and paths relative to root', () => {

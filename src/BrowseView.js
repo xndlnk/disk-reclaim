@@ -6,7 +6,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import htm from 'htm';
-import { humanSize, bar, barColor, relativePath } from './format.js';
+import { humanSize, bar, barColor, relativePath, nfc } from './format.js';
 import { topLevelMarked, reclaimableBytes } from './reclaim.js';
 import { countFiles, LARGEST_LIMIT } from './largest.js';
 
@@ -43,10 +43,10 @@ export default function BrowseView({
       <${Box}>
         ${view === 'largest'
           ? html`
-              <${Text} key="path" color="cyan" bold>${' '}${root.path}${' '}</${Text}>
+              <${Text} key="path" color="cyan" bold>${' '}${nfc(root.path)}${' '}</${Text}>
               <${Text} key="meta" dimColor=${true}>— largest ${rows.length} files${fileCount > LARGEST_LIMIT ? ` (of ${fileCount.toLocaleString()} files)` : ''}</${Text}>`
           : html`
-              <${Text} key="path" color="cyan" bold>${' '}${current.path}${' '}</${Text}>
+              <${Text} key="path" color="cyan" bold>${' '}${nfc(current.path)}${' '}</${Text}>
               <${Text} key="meta" dimColor=${true}>— ${humanSize(current.size)}, ${rows.length} items</${Text}>`}
       </${Box}>
 
@@ -68,7 +68,7 @@ export default function BrowseView({
                     <${Text} color=${bColor ?? undefined} dimColor=${bColor === null}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
                     ${view === 'largest'
                       ? html`${relativePath(root.path, child.path)}`
-                      : html`${child.isDir ? '/' : ' '}${child.name}${child.error ? ` !${child.error}` : ''}`}
+                      : html`${child.isDir ? '/' : ' '}${nfc(child.name)}${child.error ? ` !${child.error}` : ''}`}
                   </${Text}>`;
               })}
         </${Box}>
