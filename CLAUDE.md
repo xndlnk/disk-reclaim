@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm install                 # install deps (react, ink, htm)
 node src/index.js [path]    # run the TUI on [path] (defaults to cwd)
+node src/index.js --no-sound # run without the delete boom sound (also: DISK_RECLAIM_SOUND=0)
 npm start                   # same as: node src/index.js
 npm link && disk-reclaim ~  # install globally, then run as `disk-reclaim [path]`
 
@@ -18,7 +19,7 @@ There is no build step or linter. Tests use Node's built-in runner (`node:test` 
 
 ## Architecture
 
-An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and lets the user mark items into a "reclaim cart" and batch-delete them. Source is seven ES modules in `src/`:
+An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and lets the user mark items into a "reclaim cart" and batch-delete them. Source is eight ES modules in `src/`:
 
 - **index.js** — CLI entry (`bin: disk-reclaim`, shebang). Shows a loading screen while `scan()` runs, then mounts `App`.
 - **scan.js** — recursive tree walk producing `{ name, path, isDir, size, children, parent, error }` nodes.
@@ -28,6 +29,7 @@ An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and le
 - **rules.js** — the auto-mark rule engine (`RULES` registry of regenerable dirs) behind the `r` key.
 - **format.js** — display helpers (`humanSize`, `bar`, `barColor`, `relativePath`).
 - **boom.js** — procedural full-screen atomic mushroom-cloud animation (`boomGrid`, `BOOM_STEPS`) for the delete-confirmation "explosion". Purely cosmetic; no filesystem effects.
+- **sound.js** — `playBoom()`, a fire-and-forget boom sound that shells out to the OS audio player (`afplay`/`paplay`/`aplay`/`ffplay`/`play`/PowerShell). Fails silently if no player or audio device; muted by `--no-sound` (passed as App's `sound` prop) or `DISK_RECLAIM_SOUND=0`. The `assets/boom.wav` it plays is synthesized by `scripts/gen-boom.mjs` (`npm run gen:boom`).
 
 Read the module for its API; the invariants below are what must survive a change.
 

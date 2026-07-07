@@ -8,7 +8,9 @@ import App from './App.js';
 
 const html = htm.bind(React.createElement);
 
-const target = process.argv[2] || process.cwd();
+const args = process.argv.slice(2);
+const sound = !args.includes('--no-sound'); // also mutable globally via DISK_RECLAIM_SOUND=0
+const target = args.find((a) => !a.startsWith('-')) || process.cwd();
 
 // Loading screen while the tree is walked. The total is unknown until the walk
 // finishes, so instead of a percentage bar we show a spinner plus a live
@@ -38,7 +40,7 @@ try {
   const root = await scan(target, (p) => setProgress && setProgress(p));
   loader.unmount();
   loader.clear();
-  render(html`<${App} root=${root} />`);
+  render(html`<${App} root=${root} sound=${sound} />`);
 } catch (err) {
   loader.unmount();
   console.error(`disk-reclaim: could not scan "${target}": ${err.message}`);

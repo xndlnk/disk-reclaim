@@ -6,6 +6,7 @@ import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from '.
 import { findMatches, RULES } from './rules.js';
 import { largestFiles, countFiles } from './largest.js';
 import { boomGrid, BOOM_STEPS } from './boom.js';
+import { playBoom } from './sound.js';
 
 const html = htm.bind(React.createElement);
 
@@ -32,7 +33,7 @@ function windowFor(cursor, total, height) {
   return { start, end: start + height };
 }
 
-export default function App({ root }) {
+export default function App({ root, sound = true }) {
   const { exit } = useApp();
   const [current, setCurrent] = useState(root);
   const [cursor, setCursor] = useState(0);
@@ -115,6 +116,7 @@ export default function App({ root }) {
   useEffect(() => {
     if (mode !== 'exploding') return;
     let cancelled = false;
+    if (sound) playBoom(); // fire-and-forget, synced to the blast; silent if unavailable
     const id = setInterval(() => setBoomFrame((f) => Math.min(f + 1, BOOM_STEPS - 2)), 90);
     (async () => {
       const [result] = await Promise.all([
