@@ -6,8 +6,8 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import htm from 'htm';
-import { humanSize } from './format.js';
-import { boomGrid } from './boom.js';
+import { humanSize } from '../util/format.js';
+import { boomGrid } from '../util/boom.js';
 
 const html = htm.bind(React.createElement);
 

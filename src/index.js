@@ -2,9 +2,9 @@
 import React from 'react';
 import { render, Text, Box } from 'ink';
 import htm from 'htm';
-import { scan } from './scan.js';
-import { humanSize } from './format.js';
-import App from './App.js';
+import { scan } from './core/scan.js';
+import { humanSize } from './util/format.js';
+import App from './ui/App.js';
 
 const html = htm.bind(React.createElement);
 

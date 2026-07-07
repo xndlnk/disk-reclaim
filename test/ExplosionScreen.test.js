@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import htm from 'htm';
 
-import ExplosionScreen from '../src/ExplosionScreen.js';
-import { humanSize } from '../src/format.js';
+import ExplosionScreen from '../src/ui/ExplosionScreen.js';
+import { humanSize } from '../src/util/format.js';
 import { renderToText } from '../test-support/render.js';
 
 const html = htm.bind(React.createElement);

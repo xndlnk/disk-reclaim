@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { humanSize, bar, barColor, relativePath, nfc, formatAge } from '../src/format.js';
+import { humanSize, bar, barColor, relativePath, nfc, formatAge } from '../src/util/format.js';
 
 test('humanSize: zero and sub-1 bytes render as "0 B"', () => {
   assert.equal(humanSize(0), '0 B');

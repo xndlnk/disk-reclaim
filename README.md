@@ -101,7 +101,7 @@ them all into the cart at once — no hunting required. The built-in rules match
 `node_modules`, `dist`, `build`, `.next`, `target`, `__pycache__`, and `.gradle`.
 Matches merge into any marks you already have, and a matched folder isn't searched
 any deeper, so nested copies don't pile up. Review the cart and press `d` when
-you're ready. Rules live in `src/rules.js` as an extensible `RULES` registry —
+you're ready. Rules live in `src/core/rules.js` as an extensible `RULES` registry —
 add a `{ id, label, match(node) }` entry to teach it a new pattern.
 
 ### Finding the largest files
@@ -116,16 +116,16 @@ press `l` again (or `←`) to return exactly where you left off.
 
 ## How it works
 
-- **`src/scan.js`** — recursively walks the tree with `fs.lstat` (symlinks are
+- **`src/core/scan.js`** — recursively walks the tree with `fs.lstat` (symlinks are
   counted but never followed, avoiding double-counting and loops) and sums sizes
   bottom-up. Reports a live file count during the scan.
-- **`src/App.js`** — the Ink UI: a scrollable, size-sorted list per folder with
+- **`src/ui/App.js`** — the Ink UI: a scrollable, size-sorted list per folder with
   cursor navigation and a viewport that keeps the cursor on screen.
-- **`src/rules.js`** — the rule registry and `findMatches` walker behind the `r`
+- **`src/core/rules.js`** — the rule registry and `findMatches` walker behind the `r`
   auto-mark command.
-- **`src/largest.js`** — the whole-tree walk (`largestFiles`, `countFiles`) that
+- **`src/core/largest.js`** — the whole-tree walk (`largestFiles`, `countFiles`) that
   backs the `l` largest-files view.
-- **`src/format.js`** — human-readable byte sizes, the proportion bars, and
+- **`src/util/format.js`** — human-readable byte sizes, the proportion bars, and
   `barColor`, which maps a size to red / yellow / gray heat thresholds.
 
 ## Possible next steps

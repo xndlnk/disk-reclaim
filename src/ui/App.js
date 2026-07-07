@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp, useInput } from 'ink';
 import htm from 'htm';
-import { humanSize } from './format.js';
-import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from './reclaim.js';
-import { findMatches } from './rules.js';
-import { largestFiles, LARGEST_LIMIT } from './largest.js';
-import { BOOM_STEPS } from './boom.js';
-import { playBoom } from './sound.js';
+import { humanSize } from '../util/format.js';
+import { topLevelMarked, reclaimableBytes, deleteNodes, removeFromTree } from '../core/reclaim.js';
+import { findMatches } from '../core/rules.js';
+import { largestFiles, LARGEST_LIMIT } from '../core/largest.js';
+import { BOOM_STEPS } from '../util/boom.js';
+import { playBoom } from '../util/sound.js';
 import HelpScreen from './HelpScreen.js';
 import ExplosionScreen from './ExplosionScreen.js';
 import BrowseView from './BrowseView.js';

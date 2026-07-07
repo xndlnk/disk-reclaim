@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { topLevelMarked, reclaimableBytes, removeFromTree } from '../src/reclaim.js';
+import { topLevelMarked, reclaimableBytes, removeFromTree } from '../src/core/reclaim.js';
 
 /**
  * Build a node in the same shape scan.js produces, wiring up the parent

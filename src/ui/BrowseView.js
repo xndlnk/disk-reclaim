@@ -6,9 +6,9 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import htm from 'htm';
-import { humanSize, bar, barColor, relativePath, nfc, formatAge } from './format.js';
-import { topLevelMarked, reclaimableBytes } from './reclaim.js';
-import { countFiles, LARGEST_LIMIT } from './largest.js';
+import { humanSize, bar, barColor, relativePath, nfc, formatAge } from '../util/format.js';
+import { topLevelMarked, reclaimableBytes } from '../core/reclaim.js';
+import { countFiles, LARGEST_LIMIT } from '../core/largest.js';
 
 const html = htm.bind(React.createElement);
 

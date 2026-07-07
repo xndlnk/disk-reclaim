@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import htm from 'htm';
 
-import BrowseView from '../src/BrowseView.js';
+import BrowseView from '../src/ui/BrowseView.js';
 import { renderToText } from '../test-support/render.js';
 
 const html = htm.bind(React.createElement);

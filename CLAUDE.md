@@ -19,17 +19,23 @@ There is no build step or linter. Tests use Node's built-in runner (`node:test` 
 
 ## Architecture
 
-An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and lets the user mark items into a "reclaim cart" and batch-delete them. Source is eleven ES modules in `src/`:
+An Ink (React-for-terminal) TUI, like `ncdu`, that scans a directory tree and lets the user mark items into a "reclaim cart" and batch-delete them. Source is eleven ES modules under `src/`, grouped into three folders (plus the entry point at the root):
 
-- **index.js** — CLI entry (`bin: disk-reclaim`, shebang). Shows a loading screen while `scan()` runs, then mounts `App`.
-- **scan.js** — recursive tree walk producing `{ name, path, isDir, size, children, parent, error }` nodes.
+**`src/index.js`** — CLI entry (`bin: disk-reclaim`, shebang). Shows a loading screen while `scan()` runs, then mounts `App`.
+
+**`src/ui/`** — the Ink (React) components:
 - **App.js** — the container: owns all state (`current`, `cursor`, `marked`, `mode`, `view`, `history`) and keyboard handling (`useInput`), then delegates rendering to one of three presentational screens by mode/`showHelp`. Note `mode` (`browse`/`confirm`/`exploding`/`boom-done`) and `view` (`tree`/`largest`) are two independent axes.
 - **BrowseView.js** — the main browse UI (scrolling list + reclaim-cart sidebar + footer). Pure/presentational; derives its own display data (visible window, cart totals) from props.
 - **HelpScreen.js** — the static full-screen help overlay (key bindings + rules explanation). Pure.
 - **ExplosionScreen.js** — renders a single mushroom-cloud frame from `boom.js` and, on the last frame, the "reclaimed" summary plate. Pure.
+
+**`src/core/`** — the filesystem + logic (no UI, no React):
+- **scan.js** — recursive tree walk producing `{ name, path, isDir, size, children, parent, error }` nodes.
 - **largest.js** — whole-tree "largest files" walk backing the `L` view.
 - **reclaim.js** — deletion + in-place tree math (dedup marks, delete, subtract freed size from ancestors).
 - **rules.js** — the auto-mark rule engine (`RULES` registry of regenerable dirs) behind the `r` key.
+
+**`src/util/`** — pure presentation/cosmetic helpers:
 - **format.js** — display helpers (`humanSize`, `bar`, `barColor`, `relativePath`).
 - **boom.js** — procedural full-screen atomic mushroom-cloud animation (`boomGrid`, `BOOM_STEPS`) for the delete-confirmation "explosion". Purely cosmetic; no filesystem effects.
 - **sound.js** — `playBoom()`, a fire-and-forget boom sound that shells out to the OS audio player (`afplay`/`paplay`/`aplay`/`ffplay`/`play`/PowerShell). Fails silently if no player or audio device; muted by `--no-sound` (passed as App's `sound` prop) or `DISK_RECLAIM_SOUND=0`. The `assets/boom.wav` it plays is synthesized by `scripts/gen-boom.mjs` (`npm run gen:boom`).

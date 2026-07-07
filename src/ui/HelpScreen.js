@@ -5,7 +5,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import htm from 'htm';
-import { RULES } from './rules.js';
+import { RULES } from '../core/rules.js';
 
 const html = htm.bind(React.createElement);
 

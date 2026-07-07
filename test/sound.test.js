@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { playBoom } from '../src/sound.js';
+import { playBoom } from '../src/util/sound.js';
 
 // The boom is a cosmetic best-effort extra: a missing/broken audio player must
 // never throw or crash the process, so it can never take the delete down with it.

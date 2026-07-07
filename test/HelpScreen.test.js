@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import React from 'react';
 import htm from 'htm';
 
-import HelpScreen from '../src/HelpScreen.js';
-import { RULES } from '../src/rules.js';
+import HelpScreen from '../src/ui/HelpScreen.js';
+import { RULES } from '../src/core/rules.js';
 import { renderToText } from '../test-support/render.js';
 
 const html = htm.bind(React.createElement);

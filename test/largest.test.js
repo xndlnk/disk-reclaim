@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { largestFiles, countFiles } from '../src/largest.js';
+import { largestFiles, countFiles } from '../src/core/largest.js';
 
 /** Build a node in the shape scan.js produces, wiring parent back-pointers.
  *  Extends the rules.test.js helper with a `size` option so sort order is testable. */

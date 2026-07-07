@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { findMatches, RULES } from '../src/rules.js';
+import { findMatches, RULES } from '../src/core/rules.js';
 
 /** Build a node in the shape scan.js produces, wiring parent back-pointers. */
 function node(name, { isDir = false, children = [] } = {}) {

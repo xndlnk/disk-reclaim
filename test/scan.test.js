@@ -4,8 +4,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { scan } from '../src/scan.js';
-import { deleteNodes } from '../src/reclaim.js';
+import { scan } from '../src/core/scan.js';
+import { deleteNodes } from '../src/core/reclaim.js';
 
 let tmp;
 
