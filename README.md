@@ -10,6 +10,27 @@ large items, yellow for medium, gray for small — so the heavy hitters stand ou
 a glance. Or press `l` for a flat "largest files" view that surfaces the biggest
 files anywhere in the tree without hunting folder by folder.
 
+## What it looks like
+
+Each folder lists its children largest-first, with a size, a heat-colored
+proportion bar and percentage, the last-changed age, and the name. The cursor
+(`▶`) and marks (`✓`) live on the left; marked items collect in the reclaim
+cart on the right with a running total.
+
+```
+ ~/Projects — 12.5 GB, 6 items
+
+▶✓    4.2 GB [####        ]  34%   2w /node_modules  ╭──────────────────────────────────╮
+      3.1 GB [###         ]  25%   3d /.git          │ Reclaim cart (2)                 │
+ ✓    2.6 GB [###         ]  21%   5d /build         │ Total: 6.8 GB                    │
+      1.8 GB [##          ]  14%  8mo /assets        │                                  │
+      780 MB [#           ]   6%   2d /src           │    4.2 GB node_modules/          │
+     18.0 KB [            ]   0%  4mo  README.md     │    2.6 GB build/                 │
+                                                     ╰──────────────────────────────────╯
+
+ space mark · r rules · d delete cart · c clear · ↑↓ move · →/Enter open · ← up · l largest · h help · q quit
+```
+
 ## Usage
 
 ```bash
