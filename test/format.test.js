@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { humanSize, bar, barColor, relativePath, nfc } from '../src/format.js';
+import { humanSize, bar, barColor, relativePath, nfc, formatAge } from '../src/format.js';
 
 test('humanSize: zero and sub-1 bytes render as "0 B"', () => {
   assert.equal(humanSize(0), '0 B');
@@ -24,6 +24,39 @@ test('humanSize: values >= 100 in a unit drop the decimal', () => {
 test('humanSize: very large values cap at PB', () => {
   // 1024^6 would be EB; the unit list stops at PB, so it stays there.
   assert.match(humanSize(1024 ** 6), /PB$/);
+});
+
+const DAY = 86_400_000;
+const NOW = new Date('2026-07-07T00:00:00Z').getTime();
+
+test('formatAge: anything under 24h (or right now) renders as blank', () => {
+  assert.equal(formatAge(NOW, NOW), '');
+  assert.equal(formatAge(NOW - (DAY - 1), NOW), '');
+});
+
+test('formatAge: an unknown mtime (0) renders as blank', () => {
+  assert.equal(formatAge(0, NOW), '');
+});
+
+test('formatAge: days below a week', () => {
+  assert.equal(formatAge(NOW - 3 * DAY, NOW), '3d');
+});
+
+test('formatAge: the week boundary reads as weeks', () => {
+  assert.equal(formatAge(NOW - 7 * DAY, NOW), '1w');
+});
+
+test('formatAge: the month boundary reads as months', () => {
+  assert.equal(formatAge(NOW - 30 * DAY, NOW), '1mo');
+});
+
+test('formatAge: the year boundary reads as years', () => {
+  assert.equal(formatAge(NOW - 365 * DAY, NOW), '1y');
+});
+
+test('formatAge: every token fits in the 4-wide column', () => {
+  for (const diff of [1 * DAY, 6 * DAY, 29 * DAY, 364 * DAY, 3650 * DAY])
+    assert.ok(formatAge(NOW - diff, NOW).length <= 4);
 });
 
 test('bar: fraction 0 is all spaces at the default width of 12', () => {

@@ -128,15 +128,15 @@ Dependencies: None
 Add the data and the pure formatter, fully covered by unit tests, with no UI change yet.
 
 **Tasks**:
-- [ ] In `src/scan.js`, add `mtime: 0` to the initial `node` literal (scan.js:26).
-- [ ] In `src/scan.js`, set the file mtime on the non-directory branch:
+- [x] In `src/scan.js`, add `mtime: 0` to the initial `node` literal (scan.js:26).
+- [x] In `src/scan.js`, set the file mtime on the non-directory branch:
   `node.mtime = stat.mtimeMs` next to `node.size = stat.size` (scan.js:37).
-- [ ] In `src/scan.js`, seed the directory mtime from its own stat as a floor
+- [x] In `src/scan.js`, seed the directory mtime from its own stat as a floor
   (`node.mtime = stat.mtimeMs`) before reading entries, and raise it per child in the
   walk loop: `node.mtime = Math.max(node.mtime, child.mtime)` alongside the existing
   `node.size += child.size` (scan.js:63). Error paths leave `mtime` at its current
   value (own dir mtime, or `0` when `lstat` itself failed) and never throw.
-- [ ] In `src/format.js`, add `formatAge(mtimeMs, nowMs)`:
+- [x] In `src/format.js`, add `formatAge(mtimeMs, nowMs)`:
   ```js
   const DAY = 86_400_000;
   export function formatAge(mtimeMs, nowMs) {
@@ -148,19 +148,19 @@ Add the data and the pure formatter, fully covered by unit tests, with no UI cha
     return `${Math.floor(diff / (365 * DAY))}y`;
   }
   ```
-- [ ] In `test/scan.test.js`, add a test: create files, backdate them with `fs.utimes`,
+- [x] In `test/scan.test.js`, add a test: create files, backdate them with `fs.utimes`,
   and assert a directory's `mtime` equals the max mtime of its descendants (and that a
   recently-written sibling raises the parent's mtime). Follow the existing `mkdtemp`
   fixture pattern.
-- [ ] In `test/format.test.js`, add tests for `formatAge` using a fixed `now` and
+- [x] In `test/format.test.js`, add tests for `formatAge` using a fixed `now` and
   `mtime = now - diff`: `<24h → ""`, `3*DAY → "3d"`, boundary `7*DAY → "1w"`,
   `30*DAY → "1mo"`, `365*DAY → "1y"`, and `mtimeMs = 0 → ""`.
 
 **Automated Verification**:
-- [ ] `node --test --test-name-pattern=formatAge` passes.
-- [ ] `node --test --test-name-pattern=scan` passes (existing size/symlink/error tests
+- [x] `node --test --test-name-pattern=formatAge` passes.
+- [x] `node --test --test-name-pattern=scan` passes (existing size/symlink/error tests
   still green, new mtime-aggregation test green).
-- [ ] `npm test` passes.
+- [x] `npm test` passes.
 
 ### Phase 2: Render the age column (user-facing)
 
@@ -170,28 +170,28 @@ Thread a single `now` reference from `App.js` and render the dim age column in t
 shared row for both views.
 
 **Tasks**:
-- [ ] In `src/App.js`, capture `const now = Date.now();` in the render body (near
+- [x] In `src/App.js`, capture `const now = Date.now();` in the render body (near
   `rows`/`total`/`viewHeight`, App.js:37-39) and pass `now=${now}` in the
   `BrowseView` element (App.js:199-210).
-- [ ] In `src/BrowseView.js`, add `now` to the destructured props and `import
+- [x] In `src/BrowseView.js`, add `now` to the destructured props and `import
   { humanSize, bar, barColor, relativePath, formatAge } from './format.js'`.
-- [ ] In `src/BrowseView.js`, insert the age column between the pct `<Text>` and the
+- [x] In `src/BrowseView.js`, insert the age column between the pct `<Text>` and the
   name section (BrowseView.js:68-71), as its own dim, fixed-width token so alignment
   holds for blank (<24h) rows:
   ```js
   <${Text} dimColor=${true}>${formatAge(child.mtime, now).padStart(4)}</${Text}>${' '}
   ```
-- [ ] In `test/BrowseView.test.js`, extend the `file`/`dir` fixtures or pass `mtime`
+- [x] In `test/BrowseView.test.js`, extend the `file`/`dir` fixtures or pass `mtime`
   via the existing `extra` object, provide a `now` in the `render` base props, and add
   a test: an old file (`mtime = now - 400*DAY`) shows `1y` on its row while a recent
   file (`mtime = now - 1000`) shows no age token — with both rows still aligned.
 
 **Automated Verification**:
-- [ ] `node --test --test-name-pattern=BrowseView` passes.
-- [ ] `npm test` passes.
+- [x] `node --test --test-name-pattern=BrowseView` passes.
+- [x] `npm test` passes.
 
 **Manual Verification**:
-- [ ] `node src/index.js .` — the browse list shows a small dim age token before names
+- [x] `node src/index.js .` — the browse list shows a small dim age token before names
   for older items and nothing for items changed in the last day; toggle the largest
   view with `l` and confirm the same column appears there. Columns stay aligned on a
   narrow terminal.

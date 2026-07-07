@@ -23,7 +23,7 @@ export async function scan(dir, onProgress) {
 }
 
 async function walk(nodePath, name, parent, counter, onProgress) {
-  const node = { name, path: nodePath, isDir: false, size: 0, children: [], parent, error: null };
+  const node = { name, path: nodePath, isDir: false, size: 0, mtime: 0, children: [], parent, error: null };
 
   let stat;
   try {
@@ -35,6 +35,7 @@ async function walk(nodePath, name, parent, counter, onProgress) {
 
   if (!stat.isDirectory()) {
     node.size = stat.size;
+    node.mtime = stat.mtimeMs;
     counter.files += 1;
     counter.bytes += stat.size;
     if (onProgress && counter.files % 500 === 0)
@@ -43,6 +44,7 @@ async function walk(nodePath, name, parent, counter, onProgress) {
   }
 
   node.isDir = true;
+  node.mtime = stat.mtimeMs; // floor: the dir's own mtime, raised per child below
   counter.dir = nodePath;
   if (onProgress) onProgress({ files: counter.files, bytes: counter.bytes, dir: nodePath });
 
@@ -61,6 +63,7 @@ async function walk(nodePath, name, parent, counter, onProgress) {
     const child = await walk(path.join(nodePath, entry.name), entry.name, node, counter, onProgress);
     node.children.push(child);
     node.size += child.size;
+    node.mtime = Math.max(node.mtime, child.mtime);
   }
 
   return node;

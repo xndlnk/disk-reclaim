@@ -24,6 +24,9 @@ function dir(name, parent, extra = {}) {
 
 // Render BrowseView wide enough that the list column and the fixed 36-wide cart
 // sit side by side without truncating our short fixture names.
+const NOW = new Date('2026-07-07T00:00:00Z').getTime();
+const DAY = 86_400_000;
+
 function render(props) {
   const base = {
     view: 'tree',
@@ -32,6 +35,7 @@ function render(props) {
     viewHeight: 10,
     mode: 'browse',
     status: '',
+    now: NOW,
   };
   return renderToText(html`<${BrowseView} ...${{ ...base, ...props }} />`, { columns: 120, rows: 30 });
 }
@@ -66,6 +70,22 @@ test('BrowseView: tree rows show size, a leading slash for dirs, and a space for
   const fileLine = lineWith(out, 'a.txt');
   assert.ok(fileLine.includes('100 B'), `file row: ${fileLine}`);
   assert.ok(!fileLine.includes('/a.txt'), 'a file row must not get the dir slash');
+});
+
+// --- age column ----------------------------------------------------------
+
+test('BrowseView: old rows show a dim age token, recent rows show none, aligned', () => {
+  const root = dir('scan', null);
+  const oldFile = file('old.bin', root, 100, { mtime: NOW - 400 * DAY });
+  const freshFile = file('fresh.bin', root, 100, { mtime: NOW - 1000 });
+  const out = render({ root, current: root, rows: [oldFile, freshFile], total: 200 });
+
+  const oldLine = lineWith(out, 'old.bin');
+  const freshLine = lineWith(out, 'fresh.bin');
+  assert.ok(oldLine.includes('1y'), `old row should show an age token: ${oldLine}`);
+  assert.ok(!/\d(d|w|mo|y)\b/.test(freshLine), `recent row shows no age token: ${freshLine}`);
+  // The blank age column keeps the name column aligned across both rows.
+  assert.equal(oldLine.indexOf('old.bin'), freshLine.indexOf('fresh.bin'), 'names stay aligned');
 });
 
 // --- selection + marks ---------------------------------------------------

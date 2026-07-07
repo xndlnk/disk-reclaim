@@ -38,6 +38,31 @@ test('scan: builds a tree with bottom-up directory sizes', async () => {
   assert.equal(tree.size, 4 + 2 + 6);
 });
 
+test('scan: a directory mtime is the max mtime of its whole subtree', async () => {
+  const root = path.join(tmp, 'mtimefix');
+  await fs.mkdir(path.join(root, 'sub'), { recursive: true });
+  const old = path.join(root, 'sub', 'old.txt');
+  const fresh = path.join(root, 'fresh.txt');
+  await fs.writeFile(old, 'x');
+  await fs.writeFile(fresh, 'y');
+
+  // Backdate both, then bump the sibling so it's the newest descendant.
+  const longAgo = new Date('2020-01-01T00:00:00Z');
+  const recent = new Date('2024-06-01T00:00:00Z');
+  await fs.utimes(old, longAgo, longAgo);
+  await fs.utimes(fresh, recent, recent);
+  await fs.utimes(path.join(root, 'sub'), longAgo, longAgo);
+  await fs.utimes(root, longAgo, longAgo); // dir's own mtime floor, below the fresh sibling
+
+  const tree = await scan(root);
+
+  const sub = tree.children.find((c) => c.name === 'sub');
+  // sub's mtime is its single old descendant.
+  assert.equal(sub.mtime, longAgo.getTime());
+  // The root rolls up to the newest descendant (the fresh sibling), not the old one.
+  assert.equal(tree.mtime, recent.getTime());
+});
+
 test('scan: never follows symlinks into the child tree', async () => {
   const root = path.join(tmp, 'symfix');
   await fs.mkdir(root, { recursive: true });

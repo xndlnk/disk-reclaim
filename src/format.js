@@ -11,6 +11,23 @@ export function humanSize(bytes) {
   return `${value.toFixed(digits)} ${UNITS[exp]}`;
 }
 
+const DAY = 86_400_000;
+
+/**
+ * A compact "age" token for a node's last-changed time — the single largest unit,
+ * ≤ 4 chars: "3d", "2w", "8mo", "2y". Returns "" for anything under 24h (treated
+ * as "current") or an unknown mtime (0), so those rows render a blank column.
+ * Pure: `nowMs` is passed in so there is no hidden clock dependency.
+ */
+export function formatAge(mtimeMs, nowMs) {
+  const diff = nowMs - mtimeMs;
+  if (!mtimeMs || diff < DAY) return ''; // <24h or unknown → "current"
+  if (diff < 7 * DAY) return `${Math.floor(diff / DAY)}d`;
+  if (diff < 30 * DAY) return `${Math.floor(diff / (7 * DAY))}w`;
+  if (diff < 365 * DAY) return `${Math.floor(diff / (30 * DAY))}mo`;
+  return `${Math.floor(diff / (365 * DAY))}y`;
+}
+
 /** A fixed-width proportional bar, e.g. "[####      ]". */
 export function bar(fraction, width = 12) {
   const filled = Math.round(Math.max(0, Math.min(1, fraction)) * width);

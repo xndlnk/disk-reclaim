@@ -37,6 +37,7 @@ export default function App({ root, sound = true }) {
   const rows = currentRows();
   const total = (view === 'largest' ? root.size : current.size) || 1;
   const viewHeight = Math.max(3, (process.stdout.rows || 24) - 7);
+  const now = Date.now(); // one time reference per render, so every row's age agrees
 
   const enter = (target) => {
     if (!target || !target.isDir) return;
@@ -207,5 +208,6 @@ export default function App({ root, sound = true }) {
     viewHeight=${viewHeight}
     mode=${mode}
     status=${status}
+    now=${now}
   />`;
 }

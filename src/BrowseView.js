@@ -6,7 +6,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import htm from 'htm';
-import { humanSize, bar, barColor, relativePath, nfc } from './format.js';
+import { humanSize, bar, barColor, relativePath, nfc, formatAge } from './format.js';
 import { topLevelMarked, reclaimableBytes } from './reclaim.js';
 import { countFiles, LARGEST_LIMIT } from './largest.js';
 
@@ -31,6 +31,7 @@ export default function BrowseView({
   viewHeight,
   mode,
   status,
+  now,
 }) {
   const { start, end } = windowFor(cursor, rows.length, viewHeight);
   const visible = rows.slice(start, end);
@@ -66,6 +67,7 @@ export default function BrowseView({
                     ${selected ? '▶' : ' '}${isMarked ? '✓' : ' '}${' '}
                     ${humanSize(child.size).padStart(9)}${' '}
                     <${Text} color=${bColor ?? undefined} dimColor=${bColor === null}>${bar(frac)}${' '}${String(Math.round(frac * 100)).padStart(3)}%</${Text}>${' '}
+                    <${Text} dimColor=${true}>${formatAge(child.mtime, now).padStart(4)}</${Text}>${' '}
                     ${view === 'largest'
                       ? html`${relativePath(root.path, child.path)}`
                       : html`${child.isDir ? '/' : ' '}${nfc(child.name)}${child.error ? ` !${child.error}` : ''}`}
