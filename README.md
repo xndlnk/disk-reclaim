@@ -47,13 +47,13 @@ disk-reclaim ~/Downloads
 
 ## Download for Windows (no Node install)
 
-Grab `disk-reclaim-win-x64.zip` from the [Releases](../../releases) page, unzip it, and run:
+Grab `disk-reclaim-win-x64.zip` from the [Releases](../../releases) page, unzip it, and drag a folder from Explorer onto `disk-reclaim.cmd`.
+
+Or, from a terminal:
 
 ```
 disk-reclaim.cmd C:\path\to\folder
 ```
-
-Or drag a folder from Explorer onto `disk-reclaim.cmd`.
 
 A few things to keep in mind:
 
