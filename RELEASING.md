@@ -34,19 +34,13 @@ driven by the [GitHub CLI](https://cli.github.com/) (`gh`).
    `main` HEAD:
 
    ```bash
-   gh release create vX.Y.Z dist/disk-reclaim-win-x64.zip \
-     --draft \
-     --title "vX.Y.Z" \
-     --notes "Windows standalone build (no Node install required). Bundles Node vA.B.C.
-
-   Unzip and drag a folder onto disk-reclaim.cmd, or run it from a terminal:
-     disk-reclaim.cmd C:\path\to\folder"
+   gh release create vX.Y.Z dist/disk-reclaim-win-x64.zip --draft --title "vX.Y.Z" --notes "Windows standalone build (no Node install required). Bundles Node vA.B.C"
    ```
 
    Replace `vX.Y.Z` with the app version and `vA.B.C` with the Node version
    from step 3.
 
-5. **Verify**:
+5. **Verify** the draft:
 
    ```bash
    gh release view vX.Y.Z --web
@@ -54,11 +48,16 @@ driven by the [GitHub CLI](https://cli.github.com/) (`gh`).
 
    Confirm the zip asset is attached and the notes look right.
 
+6. **Publish** once verified:
+
+   ```bash
+   gh release edit vX.Y.Z --draft=false
+   ```
+
+   (Or click "Publish release" on the draft's GitHub page instead.)
+
 ## Notes
 
-- Draft first if you want to review before it's public:
-  `gh release create vX.Y.Z dist/disk-reclaim-win-x64.zip --draft ...`, then
-  publish from the GitHub UI once happy.
 - The Node version is resolved automatically at build time (current LTS) —
   see `scripts/build-win.mjs` and the "Windows build pipeline" section of
   `CLAUDE.md`. It isn't pinned in source, so it's only knowable from the
