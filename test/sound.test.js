@@ -1,9 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { playBoom } from '../src/util/sound.js';
+import { existsSync } from 'node:fs';
+import { playBoom, boomPath } from '../src/util/sound.js';
 
 // The boom is a cosmetic best-effort extra: a missing/broken audio player must
 // never throw or crash the process, so it can never take the delete down with it.
+test('boomPath: resolves to the repo-root assets/boom.wav in dev checkout and it exists', () => {
+  const p = boomPath();
+  assert.ok(p.endsWith('boom.wav'), `path should end with boom.wav, got: ${p}`);
+  assert.ok(existsSync(p), `boom.wav should exist at resolved path: ${p}`);
+});
+
 test('playBoom: never throws or crashes when no audio player is available', async () => {
   const savedPath = process.env.PATH;
   const savedFlag = process.env.DISK_RECLAIM_SOUND;

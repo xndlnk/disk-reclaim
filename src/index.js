@@ -5,10 +5,27 @@ import htm from 'htm';
 import { scan } from './core/scan.js';
 import { humanSize } from './util/format.js';
 import App from './ui/App.js';
+import pkg from '../package.json' with { type: 'json' };
 
 const html = htm.bind(React.createElement);
 
 const args = process.argv.slice(2);
+
+if (args.includes('--version')) {
+  console.log(pkg.version);
+  process.exit(0);
+}
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`Usage: disk-reclaim [path] [options]
+
+  path          Directory to scan (defaults to current directory)
+
+Options:
+  --no-sound    Disable the delete boom sound
+  --version     Print version and exit
+  --help, -h    Print this help and exit`);
+  process.exit(0);
+}
 const sound = !args.includes('--no-sound'); // also mutable globally via DISK_RECLAIM_SOUND=0
 const target = args.find((a) => !a.startsWith('-')) || process.cwd();
 

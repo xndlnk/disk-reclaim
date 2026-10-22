@@ -6,12 +6,22 @@
 // Sound is a cosmetic extra and must never interfere with the TUI or the delete.
 
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 
-const BOOM = fileURLToPath(new URL('../assets/boom.wav', import.meta.url));
+export function boomPath() {
+  const here = fileURLToPath(new URL('.', import.meta.url));
+  const candidates = [
+    path.join(path.dirname(process.execPath), 'boom.wav'), // packaged: next to node.exe/app.mjs
+    path.join(here, 'boom.wav'),                            // packaged: next to the bundle
+    path.join(here, '..', '..', 'assets', 'boom.wav'),      // dev: repo-root assets/
+  ];
+  return candidates.find(existsSync) ?? candidates[candidates.length - 1];
+}
 
 /** Player commands to try, in order, for the current platform. */
-function candidates(file) {
+function playerCandidates(file) {
   if (process.platform === 'darwin') return [['afplay', [file]]];
   if (process.platform === 'win32') {
     return [['powershell', ['-NoProfile', '-c', `(New-Object Media.SoundPlayer '${file}').PlaySync()`]]];
@@ -43,7 +53,7 @@ export function playBoom() {
   const flag = process.env.DISK_RECLAIM_SOUND;
   if (flag === '0' || flag === 'false' || flag === 'off') return;
   try {
-    tryPlay(candidates(BOOM), 0);
+    tryPlay(playerCandidates(boomPath()), 0);
   } catch {
     /* never let audio break a delete */
   }

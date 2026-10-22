@@ -45,6 +45,33 @@ npm link
 disk-reclaim ~/Downloads
 ```
 
+## Download for Windows (no Node install)
+
+Grab `disk-reclaim-win-x64.zip` from the [Releases](../../releases) page, unzip it, and run:
+
+```
+disk-reclaim.cmd C:\path\to\folder
+```
+
+Or drag a folder from Explorer onto `disk-reclaim.cmd`.
+
+A few things to keep in mind:
+
+- **x64 only** — the zip bundles the official Node 22 win-x64 binary.
+- **Keep all files together** — don't move `disk-reclaim.cmd`, `node.exe`, `app.mjs`, or `boom.wav` apart; the launcher finds them by relative path.
+- **SmartScreen** — the bundled `node.exe` is Microsoft-signed, so the warning is usually quiet. If one appears, choose *More info → Run anyway*.
+- Use **Windows Terminal** or **PowerShell 7** for the box borders, colors, and cursor to render correctly; the legacy `cmd.exe` console can look rough.
+
+### Building the Windows zip
+
+On macOS or Linux (requires the `zip` CLI — `brew install zip` or `apt install zip`):
+
+```bash
+npm run build:win
+```
+
+Output: `dist/disk-reclaim-win-x64.zip`. The Node binary is cached in `.cache/` so rebuilds are offline-friendly.
+
 ## Compatibility
 
 Runs on **macOS, Linux, and Windows** — it uses only portable Node core APIs
