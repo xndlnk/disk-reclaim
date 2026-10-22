@@ -73,14 +73,14 @@ Returns the first existing path, or the last candidate if none exist (so `spawn`
 ```
 dist/
 ├── app.mjs             (~970 KB esbuild ESM bundle)
-├── node.exe            (~83 MB official Node 22 win-x64)
+├── node.exe            (~94 MB official Node win-x64, current LTS)
 ├── boom.wav
 ├── disk-reclaim.cmd    → "%~dp0node.exe" "%~dp0app.mjs" %*
 ├── README.txt
 └── disk-reclaim-win-x64.zip
 ```
 
-`.cache/` (also gitignored) holds the downloaded `node.exe` across rebuilds so repeated `npm run build:win` calls are offline-friendly.
+**Node version resolution:** the build never pins a Node version in source. It queries `https://nodejs.org/dist/index.json` for the newest release with `lts` truthy and a `win-x64-exe` build, and fetches that one. `.cache/` (gitignored) holds every version downloaded so far, keyed by version (`node-${version}-win-x64.exe`); if the index can't be reached (offline), the build falls back to the newest version already in `.cache/`, so repeated `npm run build:win` calls stay offline-friendly once a version has been fetched once.
 
 ## Design notes / invariants to preserve
 

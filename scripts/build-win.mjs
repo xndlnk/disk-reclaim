@@ -3,7 +3,7 @@
 // Requires: esbuild (npm devDependency), zip CLI (homebrew: brew install zip)
 
 import * as esbuild from 'esbuild';
-import { createWriteStream, existsSync, mkdirSync, copyFileSync, writeFileSync } from 'node:fs';
+import { createWriteStream, existsSync, mkdirSync, readdirSync, copyFileSync, writeFileSync } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { spawnSync } from 'node:child_process';
@@ -14,13 +14,53 @@ const root = path.join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const dist = path.join(root, 'dist');
 const cache = path.join(root, '.cache');
 
-const NODE_VERSION = 'v22.13.0';
-const NODE_URL = `https://nodejs.org/dist/${NODE_VERSION}/win-x64/node.exe`;
-const NODE_CACHE = path.join(cache, `node-${NODE_VERSION}-win-x64.exe`);
-
 function log(msg) {
   console.log(`build:win  ${msg}`);
 }
+
+function parseVersion(v) {
+  return v.replace(/^v/, '').split('.').map(Number);
+}
+
+function compareVersions(a, b) {
+  const pa = parseVersion(a);
+  const pb = parseVersion(b);
+  for (let i = 0; i < 3; i++) {
+    if (pa[i] !== pb[i]) return pa[i] - pb[i];
+  }
+  return 0;
+}
+
+/** The newest Node LTS release with a win-x64 build, per nodejs.org's release index.
+ *  Falls back to the newest cached node.exe if the index can't be reached, so a
+ *  previously-built checkout stays buildable offline. */
+async function resolveNodeVersion() {
+  try {
+    const res = await fetch('https://nodejs.org/dist/index.json');
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    const releases = await res.json();
+    const lts = releases.find((r) => r.lts && r.files.includes('win-x64-exe'));
+    if (!lts) throw new Error('no LTS release with a win-x64 build found in the index');
+    return lts.version;
+  } catch (err) {
+    mkdirSync(cache, { recursive: true });
+    const cached = readdirSync(cache)
+      .map((f) => f.match(/^node-(v[\d.]+)-win-x64\.exe$/)?.[1])
+      .filter(Boolean)
+      .sort(compareVersions);
+    const newest = cached.at(-1);
+    if (!newest) {
+      throw new Error(`Could not resolve the latest Node LTS version and no cached node.exe exists: ${err.message}`);
+    }
+    log(`could not reach nodejs.org (${err.message}); using cached ${newest}`);
+    return newest;
+  }
+}
+
+const NODE_VERSION = await resolveNodeVersion();
+log(`resolved latest Node LTS … ${NODE_VERSION}`);
+const NODE_URL = `https://nodejs.org/dist/${NODE_VERSION}/win-x64/node.exe`;
+const NODE_CACHE = path.join(cache, `node-${NODE_VERSION}-win-x64.exe`);
 
 function humanSize(bytes) {
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`;
