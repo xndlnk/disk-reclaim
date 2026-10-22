@@ -72,7 +72,7 @@ Returns the first existing path, or the last candidate if none exist (so `spawn`
 **`dist/` layout** (gitignored, produced by `npm run build:win`):
 ```
 dist/
-├── app.mjs             (~660 KB esbuild ESM bundle)
+├── app.mjs             (~970 KB esbuild ESM bundle)
 ├── node.exe            (~83 MB official Node 22 win-x64)
 ├── boom.wav
 ├── disk-reclaim.cmd    → "%~dp0node.exe" "%~dp0app.mjs" %*
