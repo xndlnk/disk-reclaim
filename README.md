@@ -57,7 +57,7 @@ disk-reclaim.cmd C:\path\to\folder
 
 A few things to keep in mind:
 
-- **x64 only** — the zip bundles the official Node 22 win-x64 binary.
+- **x64 only** — the zip bundles the official Node LTS win-x64 binary.
 - **Keep all files together** — don't move `disk-reclaim.cmd`, `node.exe`, `app.mjs`, or `boom.wav` apart; the launcher finds them by relative path.
 - **SmartScreen** — the bundled `node.exe` is Microsoft-signed, so the warning is usually quiet. If one appears, choose *More info → Run anyway*.
 - Use **Windows Terminal** or **PowerShell 7** for the box borders, colors, and cursor to render correctly; the legacy `cmd.exe` console can look rough.
